@@ -178,23 +178,6 @@ class ItemListAPI(Resource):
         response.status_code = 201
         return response
 
-    '''def get(self, id, item_id=None):
-        auth_data = request.authorization
-        if not User.bucketlist_own_by_user(auth_data, id):
-            abort(401)
-        if item_id:
-            item = BucketListAPI.query.filter_by(bucketlist_id=id, id=item_id)
-            if item is None:
-                items = []
-            else:
-                items = [item]
-        else:
-            items = BucketListAPI.query.filter_by(bucketlist_id=id)
-        item_list = ItemListAPI.build_item_list(items)
-        response = jsonify({'item':item_list})
-        response.status_code = 200
-        return response '''
-
     def put(self, id, item_id):
         auth_data = request.authorization
         data = self.parser.parse_args()
