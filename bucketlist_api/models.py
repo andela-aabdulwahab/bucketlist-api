@@ -68,6 +68,10 @@ class User(db.Model):
             return None
         return user
 
+    @classmethod
+    def get_user_with_token(cls, auth_data):
+        token = auth_data['username']
+        return cls.verify_token(token)
 
 class BucketList(db.Model):
     """Provides the database Model for the BucketList.

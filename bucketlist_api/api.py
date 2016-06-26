@@ -89,11 +89,6 @@ class BucketListAPI(Resource):
         self.db = get_db()
 
     @staticmethod
-    def get_user(auth_data):
-        token = auth_data['username']
-        return User.verify_token(token)
-
-    @staticmethod
     def build_bucketlist(list_bucketlist):
         bucketlist_dict = {}
         for bucketlist in list_bucketlist:
@@ -124,7 +119,7 @@ class BucketListAPI(Resource):
         if data.get('is_public'):
             bucketlist.is_public = data['is_public']
         auth_data = request.authorization
-        user = BucketListAPI.get_user(auth_data)
+        user = User.get_user_with_token(auth_data)
         bucketlist.user_id = user.id
         self.db.session.add(bucketlist)
         self.db.session.commit()
@@ -186,7 +181,7 @@ class BucketListAPI(Resource):
             limit = request.args['limit']
             if 'page' in request.args:
                 page = request.args['page']
-        user = BucketListAPI.get_user(auth_data)
+        user = User.get_user_with_token(auth_data)
         if id:
             bucketlist = BucketListAPI.get_bucketlist(id=id, user_id=user.id)
         elif request.args.get('q'):
@@ -201,7 +196,7 @@ class BucketListAPI(Resource):
     def put(self, id):
         auth_data = request.authorization
         data = self.parser.parse_args()
-        user = BucketListAPI.get_user(auth_data)
+        user = User.get_user_with_token(auth_data)
         bucketlist = (BucketList.query.filter_by(id=id, user_id=user.id)
                                       .first())
         if bucketlist is None:
@@ -218,7 +213,7 @@ class BucketListAPI(Resource):
     def delete(self, id):
         auth_data = request.authorization
         data = self.parser.parse_args()
-        user = BucketListAPI.get_user(auth_data)
+        user = User.get_user_with_token(auth_data)
         bucketlist = (BucketList.query.filter_by(id=id, user_id=user.id)
                                       .delete())
         if not bucketlist:
@@ -243,7 +238,7 @@ class ItemListAPI(Resource):
 
     @staticmethod
     def bucklist_own_by_user(auth_data, bucketlist_id):
-        user = BucketListAPI.get_user(auth_data)
+        user = User.get_user_with_token(auth_data)
         bucketlist = BucketList.query.filter_by(id=bucketlist_id).first()
         if not bucketlist or bucketlist.user_id != user.id:
             return False
