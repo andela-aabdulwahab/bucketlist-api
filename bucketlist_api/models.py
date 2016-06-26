@@ -73,6 +73,12 @@ class User(db.Model):
         token = auth_data['username']
         return cls.verify_token(token)
 
+    @classmethod
+    def user_exist(cls, username):
+        if cls.query.filter_by(username=username).first():
+            return True
+        return False
+
 class BucketList(db.Model):
     """Provides the database Model for the BucketList.
 

@@ -35,17 +35,12 @@ class CreateUserAPI(Resource):
         self.parser.add_argument('password', type=str, required=True)
         super(CreateUserAPI, self).__init__()
 
-    def user_exist(self, username):
-        if User.query.filter_by(username=username).first():
-            return True
-        return False
-
     def post(self):
         data = self.parser.parse_args()
         new_user = User(username=data['username'])
         new_user.hash_password(data['password'])
         db = get_db()
-        if self.user_exist(new_user.username):
+        if User.user_exist(new_user.username):
             abort(400)
         db.session.add(new_user)
         db.session.commit()
