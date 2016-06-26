@@ -168,6 +168,12 @@ class BucketList(db.Model):
             pagination['previous'] = page_bucketlist.prev_num
         return [cls.build_bucketlist(bucketlist), pagination]
 
+    @classmethod
+    def update_bucketlist(cls, bucketlist_id):
+        bucketlist = cls.query.filter_by(id=bucketlist_id).first()
+        cls.date_modified = datetime.now()
+        db.session.add(bucketlist)
+
 
 class BucketListItem(db.Model):
     """Provides the database Model for the items on the BucketList Items.

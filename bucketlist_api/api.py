@@ -163,11 +163,6 @@ class ItemListAPI(Resource):
         self.parser.add_argument('done', type=int, location='json')
         self.db = get_db()
 
-    def update_bucketlist(self, bucketlist_id):
-        bucketlist = BucketList.query.filter_by(id=bucketlist_id).first()
-        bucketlist.date_modified = datetime.now()
-        self.db.session.add(bucketlist)
-
     def post(self, id):
         data = self.parser.parse_args()
         auth_data = request.authorization
@@ -177,7 +172,7 @@ class ItemListAPI(Resource):
         item.date_created = datetime.now()
         item.date_modified = datetime.now()
         self.db.session.add(item)
-        self.update_bucketlist(id)
+        BucketList.update_bucketlist(id)
         self.db.session.commit()
         response = jsonify({'item':item.id})
         response.status_code = 201
@@ -215,7 +210,7 @@ class ItemListAPI(Resource):
             item.done = data['done']
         item.date_modified = datetime.now()
         self.db.session.add(item)
-        self.update_bucketlist(id)
+        BucketList.update_bucketlist(id)
         self.db.session.commit()
         response = jsonify({'item':item.id})
         response.status_code = 200
@@ -229,7 +224,7 @@ class ItemListAPI(Resource):
                                            bucketlist_id=item_id).delete()
         if not item:
             abort(404)
-        self.update_bucketlist(id)
+        BucketList.update_bucketlist(id)
         self.db.commit()
         response = jsonify({'item': item})
         response.status_code = 200
