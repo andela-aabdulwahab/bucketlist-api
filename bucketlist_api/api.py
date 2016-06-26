@@ -57,8 +57,33 @@ class CreateUserAPI(Resource):
 
 
 
+class LoginUserAPI(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('username', type=str, required=True,
+                                    location='json')
+        self.parser.add_argument('password', type=str, required=True,
+                                    location='json')
+        super(LoginUserAPI, self).__init__()
+
+    def get_user(self, username, password):
+        user = User.query.filter_by(username=username).first()
+        if user is None or not user.verify_password(password):
+            return None
+        return user
+
+    def post(self):
+        data = self.parser.parse_args()
+        user = self.get_user(data['username'], data['password'])
+        if not user:
+            abort(401)
+        token = user.generate_auth_token()
+        return jsonify({'token': token.decode('ascii')})
+
+
 #build api end point to handle 405 that returns json
 api.add_resource(CreateUserAPI, '/auth/register', endpoint='register')
+api.add_resource(LoginUserAPI, '/auth/login', endpoint='login')
 
 if __name__ == '__main__':
     app.run(debug=True)
