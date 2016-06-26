@@ -101,45 +101,6 @@ class BucketListAPI(Resource):
         response.status_code = 201
         return response
 
-    @staticmethod
-    def get_bucketlist(id=None, user_id=None, **kwargs):
-        query = (BucketList.query.filter_by(user_id=user_id)
-                        .order_by(BucketList.date_modified.desc()))
-        if id:
-            bucketlist = query.filter_by(id=id).first()
-            if bucketlist is None:
-                bucketlist = []
-            else:
-                bucketlist = [bucketlist]
-            return [BucketList.build_bucketlist(bucketlist), None]
-        if kwargs.get('q'):
-            query = query.filter(BucketList.name.contains(kwargs.get('q')))
-        page = kwargs.get('page')
-        limit = kwargs.get('limit')
-        if page or limit:
-            if page and page.isdigit():
-                page = int(page)
-            else:
-                page = None
-            if limit and limit.isdigit():
-                limit = int(limit)
-                if limit > 100:
-                    limit = 100
-            else:
-                limit = 20
-        page_bucketlist = query.paginate(page=page, per_page=limit)
-        bucketlist = page_bucketlist.items
-        pagination = {
-            'page_number': page_bucketlist.page,
-            'pages': page_bucketlist.pages,
-            'total_bucketlist': page_bucketlist.total,
-        }
-        if page_bucketlist.has_next:
-            pagination['next'] = page_bucketlist.next_num
-        if page_bucketlist.has_prev:
-            pagination['previous'] = page_bucketlist.prev_num
-        return [BucketList.build_bucketlist(bucketlist), pagination]
-
     def get(self, id=None):
         auth_data = request.authorization
         limit = None
@@ -150,12 +111,12 @@ class BucketListAPI(Resource):
                 page = request.args['page']
         user = User.get_user_with_token(auth_data)
         if id:
-            bucketlist = BucketListAPI.get_bucketlist(id=id, user_id=user.id)
+            bucketlist = BucketList.get_bucketlist(id=id, user_id=user.id)
         elif request.args.get('q'):
             q = request.args['q']
-            bucketlist = BucketListAPI.get_bucketlist(user_id=user.id, q=q)
+            bucketlist = BucketList.get_bucketlist(user_id=user.id, q=q)
         else:
-            bucketlist = BucketListAPI.get_bucketlist(user_id=user.id, limit=limit, page=page)
+            bucketlist = BucketList.get_bucketlist(user_id=user.id, limit=limit, page=page)
         if len(bucketlist) < 1:
             abort(404)
         return jsonify({'bucketlist': bucketlist})
