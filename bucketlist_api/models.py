@@ -79,6 +79,14 @@ class User(db.Model):
             return True
         return False
 
+    @staticmethod
+    def bucketlist_own_by_user(auth_data, bucketlist_id):
+        user = User.get_user_with_token(auth_data)
+        bucketlist = BucketList.query.filter_by(id=bucketlist_id).first()
+        if not bucketlist or bucketlist.user_id != user.id:
+            return False
+        return True
+
 class BucketList(db.Model):
     """Provides the database Model for the BucketList.
 

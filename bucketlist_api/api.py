@@ -163,15 +163,6 @@ class ItemListAPI(Resource):
         self.parser.add_argument('done', type=int, location='json')
         self.db = get_db()
 
-
-    @staticmethod
-    def bucklist_own_by_user(auth_data, bucketlist_id):
-        user = User.get_user_with_token(auth_data)
-        bucketlist = BucketList.query.filter_by(id=bucketlist_id).first()
-        if not bucketlist or bucketlist.user_id != user.id:
-            return False
-        return True
-
     def update_bucketlist(self, bucketlist_id):
         bucketlist = BucketList.query.filter_by(id=bucketlist_id).first()
         bucketlist.date_modified = datetime.now()
@@ -180,7 +171,7 @@ class ItemListAPI(Resource):
     def post(self, id):
         data = self.parser.parse_args()
         auth_data = request.authorization
-        if not ItemListAPI.bucklist_own_by_user(auth_data, id):
+        if not User.bucketlist_own_by_user(auth_data, id):
             abort(401)
         item = BucketListItem(name=data['name'], bucketlist_id=id)
         item.date_created = datetime.now()
@@ -194,7 +185,7 @@ class ItemListAPI(Resource):
 
     '''def get(self, id, item_id=None):
         auth_data = request.authorization
-        if not ItemListAPI.bucklist_own_by_user(auth_data, id):
+        if not User.bucketlist_own_by_user(auth_data, id):
             abort(401)
         if item_id:
             item = BucketListAPI.query.filter_by(bucketlist_id=id, id=item_id)
@@ -212,7 +203,7 @@ class ItemListAPI(Resource):
     def put(self, id, item_id):
         auth_data = request.authorization
         data = self.parser.parse_args()
-        if not ItemListAPI.bucklist_own_by_user(auth_data, id):
+        if not User.bucketlist_own_by_user(auth_data, id):
             abort(401)
         item = (BucketListItem.query.filter_by(id=item_id, bucketlist_id=id)
                                    .first())
@@ -232,7 +223,7 @@ class ItemListAPI(Resource):
 
     def delete(self, id, item_id):
         auth_data = request.authorization
-        if not ItemListAPI.bucklist_own_by_user(auth_data, id):
+        if not User.bucketlist_own_by_user(auth_data, id):
             abort(401)
         item = BucketListItem.query.filter_by(id=item_id,
                                            bucketlist_id=item_id).delete()
