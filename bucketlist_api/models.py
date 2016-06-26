@@ -143,9 +143,9 @@ class BucketList(db.Model):
         page_bucketlist = query.paginate(page=page, per_page=limit)
         bucketlist = page_bucketlist.items
         pagination = {
-            'page_number': page_bucketlist.page,
-            'pages': page_bucketlist.pages,
-            'total_bucketlist': page_bucketlist.total,
+            'page': page_bucketlist.page,
+            'number_of_pages': page_bucketlist.pages,
+            'total_number_of_bucketlists': page_bucketlist.total,
         }
         if page_bucketlist.has_next:
             pagination['next'] = url_for(endpoint='bucketlists', limit=limit,
