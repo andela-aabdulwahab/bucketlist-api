@@ -169,10 +169,8 @@ class BucketList(db.Model):
         limit = kwargs.get('limit', 20)
         if page and page.isdigit():
             page = int(page)
-        if limit and limit.isdigit():
-            limit = int(limit)
-            if limit > 100:
-                limit = 100
+        if limit > 100:
+            limit = 100
         return cls.paginate_bucketlist(query, page, limit)
 
     @classmethod
