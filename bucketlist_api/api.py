@@ -103,20 +103,15 @@ class BucketListAPI(Resource):
 
     def get(self, id=None):
         auth_data = request.authorization
-        limit = None
-        page = None
-        if 'limit' in request.args:
-            limit = request.args['limit']
-            if 'page' in request.args:
-                page = request.args['page']
+        limit = request.args.get('limit')
+        page = request.args.get('page')
         user = User.get_user_with_token(auth_data)
+        q = request.args.get('q')
         if id:
             bucketlist = BucketList.get_bucketlist(id=id, user_id=user.id)
-        elif request.args.get('q'):
-            q = request.args['q']
-            bucketlist = BucketList.get_bucketlist(user_id=user.id, q=q)
         else:
-            bucketlist = BucketList.get_bucketlist(user_id=user.id, limit=limit, page=page)
+            bucketlist = BucketList.get_bucketlist(user_id=user.id, q=q,
+                                                   limit=limit, page=page)
         if len(bucketlist) < 1:
             abort(404)
         return jsonify({'bucketlist': bucketlist})
