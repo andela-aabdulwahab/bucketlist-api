@@ -129,32 +129,17 @@ class BucketList(db.Model):
             return []
         return BucketListItem.build_item_list(items)
 
+    @staticmethod
+    def id_bucketlist(query):
+        bucketlist = query.filter_by(id=id).first()
+        if bucketlist is None:
+            bucketlist = []
+        else:
+            bucketlist = [bucketlist]
+        return [cls.build_bucketlist(bucketlist), None]
+
     @classmethod
-    def get_bucketlist(cls, id=None, user_id=None, **kwargs):
-        query = (cls.query.filter_by(user_id=user_id)
-                        .order_by(cls.date_modified.desc()))
-        if id:
-            bucketlist = query.filter_by(id=id).first()
-            if bucketlist is None:
-                bucketlist = []
-            else:
-                bucketlist = [bucketlist]
-            return [cls.build_bucketlist(bucketlist), None]
-        if kwargs.get('q'):
-            query = query.filter(cls.name.contains(kwargs.get('q')))
-        page = kwargs.get('page')
-        limit = kwargs.get('limit')
-        if page or limit:
-            if page and page.isdigit():
-                page = int(page)
-            else:
-                page = None
-            if limit and limit.isdigit():
-                limit = int(limit)
-                if limit > 100:
-                    limit = 100
-            else:
-                limit = 20
+    def paginate_bucketlist(cls, query, page, limit):
         page_bucketlist = query.paginate(page=page, per_page=limit)
         bucketlist = page_bucketlist.items
         pagination = {
@@ -167,6 +152,24 @@ class BucketList(db.Model):
         if page_bucketlist.has_prev:
             pagination['previous'] = page_bucketlist.prev_num
         return [cls.build_bucketlist(bucketlist), pagination]
+
+    @classmethod
+    def get_bucketlist(cls, id=None, user_id=None, **kwargs):
+        query = (cls.query.filter_by(user_id=user_id)
+                        .order_by(cls.date_modified.desc()))
+        if id:
+            return cls.id_bucketlist(query)
+        if kwargs.get('q'):
+            query = query.filter(cls.name.contains(kwargs.get('q')))
+        page = kwargs.get('page')
+        limit = kwargs.get('limit', 20)
+        if page and page.isdigit():
+            page = int(page)
+        if limit and limit.isdigit():
+            limit = int(limit)
+            if limit > 100:
+                limit = 100
+        return cls.paginate_bucketlist(query, page, limit)
 
     @classmethod
     def update_bucketlist(cls, bucketlist_id):
