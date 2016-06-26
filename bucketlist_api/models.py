@@ -61,6 +61,13 @@ class User(db.Model):
         user = User.query.get(data['id'])
         return user
 
+    @staticmethod
+    def get_user(username, password):
+        user = User.query.filter_by(username=username).first()
+        if user is None or not user.verify_password(password):
+            return None
+        return user
+
 
 class BucketList(db.Model):
     """Provides the database Model for the BucketList.

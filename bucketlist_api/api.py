@@ -66,15 +66,10 @@ class LoginUserAPI(Resource):
                                     location='json')
         super(LoginUserAPI, self).__init__()
 
-    def get_user(self, username, password):
-        user = User.query.filter_by(username=username).first()
-        if user is None or not user.verify_password(password):
-            return None
-        return user
 
     def post(self):
         data = self.parser.parse_args()
-        user = self.get_user(data['username'], data['password'])
+        user = User.get_user(data['username'], data['password'])
         if not user:
             abort(401)
         token = user.generate_auth_token()
