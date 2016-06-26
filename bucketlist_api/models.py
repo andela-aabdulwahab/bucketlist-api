@@ -99,6 +99,27 @@ class BucketList(db.Model):
     items = db.relationship('BucketListItem', backref=db.backref('bucketlist',
                            lazy='joined'), lazy='dynamic')
 
+    @classmethod
+    def build_bucketlist(cls, list_bucketlist):
+        bucketlist_dict = {}
+        for bucketlist in list_bucketlist:
+            bucketlist_dict[bucketlist.id] = {
+                'id': bucketlist.id,
+                'items': cls.get_bucketlist_items(bucketlist.id),
+                'name': bucketlist.name,
+                'date_created': bucketlist.date_created,
+                'date_modified': bucketlist.date_modified,
+                'created_by': bucketlist.user_id
+            }
+        return bucketlist_dict
+
+    @staticmethod
+    def get_bucketlist_items(bucketlist_id):
+        items = (BucketListItem.query.filter_by(bucketlist_id = bucketlist_id)
+                                     .all())
+        if not items:
+            return []
+        return BucketListItem.build_item_list(items)
 
 
 class BucketListItem(db.Model):
@@ -118,3 +139,17 @@ class BucketListItem(db.Model):
     date_created = db.Column(db.DateTime, default=datetime.now())
     date_modified = db.Column(db.DateTime, default=datetime.now())
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'))
+
+    @staticmethod
+    def build_item_list(items):
+        item_list = []
+        for item in items:
+            item_dict = {
+            'id':item.id,
+            'name':item.name,
+            'date_created':item.date_created,
+            'date_modified':item.date_modified,
+            'done': item.done
+            }
+            item_list.append(item_dict)
+        return item_list

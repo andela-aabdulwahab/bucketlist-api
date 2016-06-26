@@ -83,28 +83,6 @@ class BucketListAPI(Resource):
         self.parser.add_argument('Authorization', location='headers')
         self.db = get_db()
 
-    @staticmethod
-    def build_bucketlist(list_bucketlist):
-        bucketlist_dict = {}
-        for bucketlist in list_bucketlist:
-            bucketlist_dict[bucketlist.id] = {
-                'id': bucketlist.id,
-                'items': BucketListAPI.get_bucketlist_items(bucketlist.id),
-                'name': bucketlist.name,
-                #'date_created': bucketlist.date_created.strftime("%d %B, %Y"),
-                'date_created': bucketlist.date_created,
-                'date_modified': bucketlist.date_modified,
-                'created_by': bucketlist.user_id
-            }
-        return bucketlist_dict
-
-    @staticmethod
-    def get_bucketlist_items(bucketlist_id):
-        items = (BucketListItem.query.filter_by(bucketlist_id = bucketlist_id)
-                                     .all())
-        if not items:
-            return []
-        return ItemListAPI.build_item_list(items)
 
     def post(self):
         data = self.parser.parse_args()
@@ -133,7 +111,7 @@ class BucketListAPI(Resource):
                 bucketlist = []
             else:
                 bucketlist = [bucketlist]
-            return [BucketListAPI.build_bucketlist(bucketlist), None]
+            return [BucketList.build_bucketlist(bucketlist), None]
         if kwargs.get('q'):
             query = query.filter(BucketList.name.contains(kwargs.get('q')))
         page = kwargs.get('page')
@@ -160,7 +138,7 @@ class BucketListAPI(Resource):
             pagination['next'] = page_bucketlist.next_num
         if page_bucketlist.has_prev:
             pagination['previous'] = page_bucketlist.prev_num
-        return [BucketListAPI.build_bucketlist(bucketlist), pagination]
+        return [BucketList.build_bucketlist(bucketlist), pagination]
 
 
     def search_bucketlist(self, q):
@@ -238,20 +216,6 @@ class ItemListAPI(Resource):
         if not bucketlist or bucketlist.user_id != user.id:
             return False
         return True
-
-    @staticmethod
-    def build_item_list(items):
-        item_list = []
-        for item in items:
-            item_dict = {
-            'id':item.id,
-            'name':item.name,
-            'date_created':item.date_created,
-            'date_modified':item.date_modified,
-            'done': item.done
-            }
-            item_list.append(item_dict)
-        return item_list
 
     def update_bucketlist(self, bucketlist_id):
         bucketlist = BucketList.query.filter_by(id=bucketlist_id).first()
