@@ -26,6 +26,12 @@ def create(default_data=True, sample_data=False):
     "Creates database tables from sqlalchemy models"
     db.create_all()
 
+@manager.command
+def test():
+    """Run test for the application."""
+    test_response = nose.run(argv=['--with-coverage'])
+    return test_response
+
 @manager.shell
 def make_shell_context():
     return dict(app=app, db=db, models=models)
