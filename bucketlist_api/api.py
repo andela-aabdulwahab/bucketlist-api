@@ -140,12 +140,6 @@ class BucketListAPI(Resource):
             pagination['previous'] = page_bucketlist.prev_num
         return [BucketList.build_bucketlist(bucketlist), pagination]
 
-
-    def search_bucketlist(self, q):
-        BucketList.query.filter_by(BucketList.name.like(q))
-
-
-
     def get(self, id=None):
         auth_data = request.authorization
         limit = None
