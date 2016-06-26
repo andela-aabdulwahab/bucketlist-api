@@ -148,9 +148,13 @@ class BucketList(db.Model):
             'total_bucketlist': page_bucketlist.total,
         }
         if page_bucketlist.has_next:
-            pagination['next'] = page_bucketlist.next_num
+            pagination['next'] = url_for(endpoint='bucketlists', limit=limit,
+                                         page=page_bucketlist.next_num,
+                                         _method='GET', _external=True)
         if page_bucketlist.has_prev:
-            pagination['previous'] = page_bucketlist.prev_num
+            pagination['previous'] = url_for(endpoint='bucketlists',limit=limit,
+                                             page=page_bucketlist.prev_num,
+                                             _method='GET', _external=True)
         return [cls.build_bucketlist(bucketlist), pagination]
 
     @classmethod
