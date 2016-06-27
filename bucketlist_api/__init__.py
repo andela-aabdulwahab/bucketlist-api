@@ -1,5 +1,4 @@
 from flask import Flask, Blueprint
-from flask_sqlalchemy import SQLAlchemy
 def create_app(ConfigObj):
     """Create an instance of Flask with the right
     configuration.
@@ -14,5 +13,3 @@ def create_app(ConfigObj):
     api_blueprint = Blueprint("api", __name__, url_prefix='/')
     app.register_blueprint(api_blueprint)
     return app
-
-db = SQLAlchemy()
