@@ -19,6 +19,11 @@ def get_db():
     #Return an instance of the database
     db.create_all()
     return db
+def save(db_model=None):
+    if db_model:
+        db.session.add(db_model)
+    db.session.commit()
+
 
 class User(db.Model):
     """Provides the database Model for Users.
@@ -181,7 +186,7 @@ class BucketList(db.Model):
     def update_bucketlist(cls, bucketlist_id):
         bucketlist = cls.query.filter_by(id=bucketlist_id).first()
         cls.date_modified = datetime.now()
-        db.session.add(bucketlist)
+        save(bucketlist)
 
 
 class BucketListItem(db.Model):

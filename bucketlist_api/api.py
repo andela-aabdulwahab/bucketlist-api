@@ -9,7 +9,7 @@ from werkzeug.http import parse_authorization_header
 from flask import Flask, jsonify, request, abort, make_response, url_for
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_httpauth import HTTPBasicAuth
-from bucketlist_api.models import User, BucketList, BucketListItem, get_db
+from bucketlist_api.models import User, BucketList, BucketListItem, save
 from datetime import datetime
 from custom_error import errors
 
@@ -40,12 +40,10 @@ class CreateUserAPI(Resource):
         data = self.parser.parse_args()
         new_user = User(username=data['username'])
         new_user.hash_password(data['password'])
-        db = get_db()
         if User.user_exist(new_user.username):
             abort(409, 'SignUpFailed: A User with the specified username '
                        'already exist')
-        db.session.add(new_user)
-        db.session.commit()
+        save(new_user)
         token = new_user.generate_auth_token()
         response = jsonify({'token': token.decode('ascii')})
         response.status_code = 201
@@ -82,7 +80,6 @@ class BucketListAPI(Resource):
         self.parser.add_argument('name', type=str, location='json')
         self.parser.add_argument('is_public', type=bool, location='json')
         self.parser.add_argument('Authorization', location='headers')
-        self.db = get_db()
 
 
     def post(self):
@@ -97,8 +94,7 @@ class BucketListAPI(Resource):
         auth_data = request.authorization
         user = User.get_user_with_token(auth_data).id
         bucketlist.user_id = user.id
-        self.db.session.add(bucketlist)
-        self.db.session.commit()
+        save(bucketlist)
         response = jsonify({'bucketlist': url_for('bucketlist',id=bucketlist.id,
                             _external=True)})
         response.status_code = 201
@@ -133,8 +129,7 @@ class BucketListAPI(Resource):
         if data.get('is_public'):
             bucketlist.is_public = data['is_public']
         bucketlist.date_modified = datetime.now()
-        self.db.session.add(bucketlist)
-        self.db.session.commit()
+        save(bucketlist)
         response = jsonify({'bucketlist': url_for('bucketlist',id=bucketlist.id,
                             _external=True)})
         response.status_code = 201
@@ -149,7 +144,7 @@ class BucketListAPI(Resource):
         if not bucketlist:
             abort(404, "DeleteFailed: No bucketlist with the specified id")
         items = (BucketListItem.query.filter_by(bucketlist_id = id).delete())
-        self.db.session.commit()
+        save()
         response = jsonify({'message':'bucketlist deleted'})
         response.status_code = 201
         return response
@@ -163,7 +158,6 @@ class ItemListAPI(Resource):
         self.parser = self.parser = reqparse.RequestParser()
         self.parser.add_argument('name', type=str, location='json')
         self.parser.add_argument('done', type=int, location='json')
-        self.db = get_db()
 
     def post(self, id):
         data = self.parser.parse_args()
@@ -174,9 +168,7 @@ class ItemListAPI(Resource):
         item = BucketListItem(name=data['name'], bucketlist_id=id)
         item.date_created = datetime.now()
         item.date_modified = datetime.now()
-        self.db.session.add(item)
-        BucketList.update_bucketlist(id)
-        self.db.session.commit()
+        save(item)
         response = jsonify({'item':item.id})
         response.status_code = 201
         return response
@@ -196,9 +188,8 @@ class ItemListAPI(Resource):
         if data.get('done'):
             item.done = data['done']
         item.date_modified = datetime.now()
-        self.db.session.add(item)
+        save(item)
         BucketList.update_bucketlist(id)
-        self.db.session.commit()
         response = jsonify({'item':item.id})
         response.status_code = 200
         return response
@@ -213,7 +204,7 @@ class ItemListAPI(Resource):
         if not item:
             abort(404, "DeleteFailed: Item with the specified id not found")
         BucketList.update_bucketlist(id)
-        self.db.commit()
+        save()
         response = jsonify({'item': item})
         response.status_code = 200
         return response
