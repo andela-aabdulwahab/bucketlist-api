@@ -191,7 +191,7 @@ class ItemListAPI(Resource):
         item = (BucketListItem.query.filter_by(id=item_id, bucketlist_id=id)
                                    .first())
         if not item:
-            abort(404, "NotFound: Item with the specified id not found")
+            abort(404, "UpdateFailed: Item with the specified id not found")
         if data['name']:
             item.name = data['name']
         if data['done']:
@@ -212,7 +212,7 @@ class ItemListAPI(Resource):
         item = BucketListItem.query.filter_by(id=item_id,
                                            bucketlist_id=item_id).delete()
         if not item:
-            abort(404, "NotFound: Item with the specified id not found")
+            abort(404, "DeleteFailed: Item with the specified id not found")
         BucketList.update_bucketlist(id)
         self.db.commit()
         response = jsonify({'item': item})
