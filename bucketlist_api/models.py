@@ -139,7 +139,7 @@ class BucketList(db.Model):
         return [cls.build_bucketlist(bucketlist), None]
 
     @classmethod
-    def paginate_bucketlist(cls, query, page, limit):
+    def paginate_bucketlist(cls, query, page, limit, q):
         page_bucketlist = query.paginate(page=page, per_page=limit)
         bucketlist = page_bucketlist.items
         pagination = {
@@ -149,11 +149,11 @@ class BucketList(db.Model):
         }
         if page_bucketlist.has_next:
             pagination['next'] = url_for(endpoint='bucketlists', limit=limit,
-                                         page=page_bucketlist.next_num,
+                                         page=page_bucketlist.next_num, q=q,
                                          _method='GET', _external=True)
         if page_bucketlist.has_prev:
             pagination['previous'] = url_for(endpoint='bucketlists',limit=limit,
-                                             page=page_bucketlist.prev_num,
+                                             page=page_bucketlist.prev_num, q=q,
                                              _method='GET', _external=True)
         return [cls.build_bucketlist(bucketlist), pagination]
 
@@ -163,17 +163,18 @@ class BucketList(db.Model):
                         .order_by(cls.date_modified.desc()))
         if id:
             return cls.id_bucketlist(query)
-        if kwargs.get('q'):
-            query = query.filter(cls.name.contains(kwargs.get('q')))
+        q = kwargs.get('q')
+        if q:
+            query = query.filter(cls.name.contains(q))
         page = kwargs.get('page')
-        limit = kwargs.get('limit', '20')
+        limit = kwargs.get('limit')
         if page and page.isdigit():
             page = int(page)
         if limit.isdigit():
             limit = int(limit)
             if limit > 100:
                 limit = 100
-        return cls.paginate_bucketlist(query, page, limit)
+        return cls.paginate_bucketlist(query, page, limit, q)
 
     @classmethod
     def update_bucketlist(cls, bucketlist_id):

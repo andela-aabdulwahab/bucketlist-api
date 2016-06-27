@@ -103,7 +103,7 @@ class BucketListAPI(Resource):
 
     def get(self, id=None):
         auth_data = request.authorization
-        limit = request.args.get('limit')
+        limit = request.args.get('limit', '20')
         page = request.args.get('page')
         user = User.get_user_with_token(auth_data)
         q = request.args.get('q')
