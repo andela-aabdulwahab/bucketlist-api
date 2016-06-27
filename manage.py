@@ -3,14 +3,13 @@ from flask import Flask
 from flask_script import Manager, Shell, Server
 from flask_migrate import  Migrate, MigrateCommand
 from flask_sqlalchemy import SQLAlchemy
-from bucketlist_api import models
+from bucketlist_api import models, create_app
 from bucketlist_api.config import DevConfig
 import nose
 
-app = Flask(__name__)
-app.config.from_object(DevConfig)
+app = create_app(DevConfig)
+db = models.db
 
-db = SQLAlchemy(app)
 manager = Manager(app)
 migrate = Migrate(app, db)
 
