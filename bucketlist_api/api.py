@@ -87,16 +87,15 @@ class BucketListAPI(Resource):
 
     def post(self):
         data = self.parser.parse_args()
-        name = data.get('name')
-        if not name:
+        if not data.get('name'):
             abort(400, 'BucketListNotCreated: Name not specified for bucketlist')
-        bucketlist = BucketList(name=name, is_public=False)
+        bucketlist = BucketList(name=data['name'], is_public=False)
         bucketlist.date_created = datetime.now()
         bucketlist.date_modified = datetime.now()
         if data.get('is_public'):
             bucketlist.is_public = data['is_public']
         auth_data = request.authorization
-        user = User.get_user_with_token(auth_data)
+        user = User.get_user_with_token(auth_data).id
         bucketlist.user_id = user.id
         self.db.session.add(bucketlist)
         self.db.session.commit()
@@ -192,9 +191,9 @@ class ItemListAPI(Resource):
                                    .first())
         if not item:
             abort(404, "UpdateFailed: Item with the specified id not found")
-        if data['name']:
+        if data.get('name'):
             item.name = data['name']
-        if data['done']:
+        if data.get('done'):
             item.done = data['done']
         item.date_modified = datetime.now()
         self.db.session.add(item)
