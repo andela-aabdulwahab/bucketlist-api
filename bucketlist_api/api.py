@@ -11,9 +11,10 @@ from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_httpauth import HTTPBasicAuth
 from bucketlist_api.models import User, BucketList, BucketListItem, get_db
 from datetime import datetime
+from custom_error import errors
 
 app = Flask(__name__, static_url_path='')
-api = Api(app)
+api = Api(app, errors=errors)
 auth = HTTPBasicAuth()
 
 
@@ -41,7 +42,8 @@ class CreateUserAPI(Resource):
         new_user.hash_password(data['password'])
         db = get_db()
         if User.user_exist(new_user.username):
-            abort(400)
+            abort(409, 'SignUpFailed: A User with the specified username '
+                       'already exist')
         db.session.add(new_user)
         db.session.commit()
         token = new_user.generate_auth_token()
@@ -66,7 +68,7 @@ class LoginUserAPI(Resource):
         data = self.parser.parse_args()
         user = User.get_user(data['username'], data['password'])
         if not user:
-            abort(401)
+            abort(401, "Username or password not correct")
         token = user.generate_auth_token()
         return jsonify({'token': token.decode('ascii')})
 
@@ -85,7 +87,10 @@ class BucketListAPI(Resource):
 
     def post(self):
         data = self.parser.parse_args()
-        bucketlist = BucketList(name=data['name'], is_public=False)
+        name = data.get('name')
+        if not name:
+            abort(400, 'BucketListNotCreated: Name not specified for bucketlist')
+        bucketlist = BucketList(name=name, is_public=False)
         bucketlist.date_created = datetime.now()
         bucketlist.date_modified = datetime.now()
         if data.get('is_public'):
@@ -111,8 +116,9 @@ class BucketListAPI(Resource):
         else:
             bucketlist = BucketList.get_bucketlist(user_id=user.id, q=q,
                                                    limit=limit, page=page)
-        if len(bucketlist) < 1:
-            abort(404)
+        if len(bucketlist[0]) < 1:
+            abort(404, "NotFound: No bucketlist that satisfy the specified"
+                       " parameter found")
         return jsonify({'bucketlist': bucketlist})
 
     def put(self, id):
@@ -122,7 +128,7 @@ class BucketListAPI(Resource):
         bucketlist = (BucketList.query.filter_by(id=id, user_id=user.id)
                                       .first())
         if bucketlist is None:
-            abort(404)
+            abort(404, "UpdateFailed: No bucketlist with the specified id")
         if data.get('name'):
             bucketlist.name = data['name']
         if data.get('is_public'):
@@ -142,7 +148,7 @@ class BucketListAPI(Resource):
         bucketlist = (BucketList.query.filter_by(id=id, user_id=user.id)
                                       .delete())
         if not bucketlist:
-            abort(404)
+            abort(404, "DeleteFailed: No bucketlist with the specified id")
         items = (BucketListItem.query.filter_by(bucketlist_id = id).delete())
         self.db.session.commit()
         response = jsonify({'message':'bucketlist deleted'})
@@ -164,7 +170,8 @@ class ItemListAPI(Resource):
         data = self.parser.parse_args()
         auth_data = request.authorization
         if not User.bucketlist_own_by_user(auth_data, id):
-            abort(401)
+            abort(401, "NotPermitted: You can't access bucketlist belonging to"
+                       " other users")
         item = BucketListItem(name=data['name'], bucketlist_id=id)
         item.date_created = datetime.now()
         item.date_modified = datetime.now()
@@ -179,11 +186,12 @@ class ItemListAPI(Resource):
         auth_data = request.authorization
         data = self.parser.parse_args()
         if not User.bucketlist_own_by_user(auth_data, id):
-            abort(401)
+            abort(401, "NotPermitted: You can't access bucketlist belonging to"
+                       " other users")
         item = (BucketListItem.query.filter_by(id=item_id, bucketlist_id=id)
                                    .first())
         if not item:
-            abort(404)
+            abort(404, "NotFound: Item with the specified id not found")
         if data['name']:
             item.name = data['name']
         if data['done']:
@@ -199,11 +207,12 @@ class ItemListAPI(Resource):
     def delete(self, id, item_id):
         auth_data = request.authorization
         if not User.bucketlist_own_by_user(auth_data, id):
-            abort(401)
+            abort(401, "NotPermitted: You can't access bucketlist belonging to"
+                       " other users")
         item = BucketListItem.query.filter_by(id=item_id,
                                            bucketlist_id=item_id).delete()
         if not item:
-            abort(404)
+            abort(404, "NotFound: Item with the specified id not found")
         BucketList.update_bucketlist(id)
         self.db.commit()
         response = jsonify({'item': item})
