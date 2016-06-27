@@ -5,6 +5,7 @@ class Config(object):
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
     ERROR_404_HELP = False
     SECRET_KEY = 'randomthoughscomingtomymind'
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
 
 
 class ProdConfig(Config):
@@ -18,7 +19,7 @@ class DevConfig(Config):
     """Development configuration."""
     ENV = 'dev'
     DEBUG = True
-    DB_NAME = 'dev.db'
+    DB_NAME = 'bucktelist.sqlite'
     DB_PATH = os.path.join(Config.PROJECT_ROOT, DB_NAME)
     SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(DB_PATH)
 
