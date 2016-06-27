@@ -6,7 +6,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 from werkzeug.http import parse_authorization_header
-from flask import Flask, jsonify, request, abort, make_response
+from flask import Flask, jsonify, request, abort, make_response, url_for
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_httpauth import HTTPBasicAuth
 from bucketlist_api.models import User, BucketList, BucketListItem, get_db
@@ -96,8 +96,8 @@ class BucketListAPI(Resource):
         bucketlist.user_id = user.id
         self.db.session.add(bucketlist)
         self.db.session.commit()
-        #response = jsonify({'bucketlist': url_for('apiendpoint', bucketlist_id, _external)})
-        response = jsonify({'bucketlist':bucketlist.id})
+        response = jsonify({'bucketlist': url_for('bucketlist',id=bucketlist.id,
+                            _external=True)})
         response.status_code = 201
         return response
 
@@ -217,7 +217,7 @@ class ItemListAPI(Resource):
 api.add_resource(CreateUserAPI, '/auth/register', endpoint='register')
 api.add_resource(LoginUserAPI, '/auth/login', endpoint='login')
 api.add_resource(BucketListAPI, '/bucketlists', endpoint='bucketlists')
-api.add_resource(BucketListAPI, '/bucketlists/<int:id>', endpoint='bucktelist')
+api.add_resource(BucketListAPI, '/bucketlists/<int:id>', endpoint='bucketlist')
 api.add_resource(ItemListAPI, '/bucketlists/<int:id>/items',
                  endpoint='items')
 api.add_resource(ItemListAPI, '/bucketlists/<int:id>/items/<int:item_id>',

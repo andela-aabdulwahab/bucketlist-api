@@ -129,8 +129,8 @@ class BucketList(db.Model):
             return []
         return BucketListItem.build_item_list(items)
 
-    @staticmethod
-    def id_bucketlist(query):
+    @classmethod
+    def id_bucketlist(cls, id, query):
         bucketlist = query.filter_by(id=id).first()
         if bucketlist is None:
             bucketlist = []
@@ -162,7 +162,7 @@ class BucketList(db.Model):
         query = (cls.query.filter_by(user_id=user_id)
                         .order_by(cls.date_modified.desc()))
         if id:
-            return cls.id_bucketlist(query)
+            return cls.id_bucketlist(id, query)
         q = kwargs.get('q')
         if q:
             query = query.filter(cls.name.contains(q))
