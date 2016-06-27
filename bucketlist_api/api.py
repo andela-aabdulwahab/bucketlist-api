@@ -77,8 +77,7 @@ class BucketListAPI(Resource):
 
     def __init__(self):
         self.parser = self.parser = reqparse.RequestParser()
-        self.parser.add_argument('name', type=str, required=True,
-                                  location='json')
+        self.parser.add_argument('name', type=str, location='json')
         self.parser.add_argument('is_public', type=bool, location='json')
         self.parser.add_argument('Authorization', location='headers')
         self.db = get_db()
@@ -124,12 +123,15 @@ class BucketListAPI(Resource):
                                       .first())
         if bucketlist is None:
             abort(404)
-        if data['name']:
+        if data.get('name'):
             bucketlist.name = data['name']
+        if data.get('is_public'):
+            bucketlist.is_public = data['is_public']
         bucketlist.date_modified = datetime.now()
         self.db.session.add(bucketlist)
         self.db.session.commit()
-        response = jsonify({'bucketlist':bucketlist.id})
+        response = jsonify({'bucketlist': url_for('bucketlist',id=bucketlist.id,
+                            _external=True)})
         response.status_code = 201
         return response
 
@@ -143,7 +145,7 @@ class BucketListAPI(Resource):
             abort(404)
         items = (BucketListItem.query.filter_by(bucketlist_id = id).delete())
         self.db.session.commit()
-        response = jsonify({'bucketlist':bucketlist})
+        response = jsonify({'message':'bucketlist deleted'})
         response.status_code = 201
         return response
 

@@ -117,6 +117,7 @@ class BucketList(db.Model):
                 'name': bucketlist.name,
                 'date_created': bucketlist.date_created,
                 'date_modified': bucketlist.date_modified,
+                'is_public': bucketlist.is_public,
                 'created_by': bucketlist.user_id
             }
         return bucketlist_dict
