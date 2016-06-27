@@ -3,22 +3,16 @@ from flask import Flask, abort, request, jsonify, g, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from passlib.apps import custom_app_context as pwd_context
+from bucketlist_api import create_app
+from bucketlist_api.config import DevConfig
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
 # initialization
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'For checkpoint two preparation'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bucktelist.sqlite'
-app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
-
+app = create_app(DevConfig)
 # extensions
 db = SQLAlchemy(app)
 
-def get_db():
-    #Return an instance of the database
-    db.create_all()
-    return db
 def save(db_model=None):
     if db_model:
         db.session.add(db_model)
