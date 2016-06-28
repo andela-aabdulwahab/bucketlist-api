@@ -10,10 +10,12 @@ from flask import Flask, jsonify, request, abort, make_response, url_for
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_httpauth import HTTPBasicAuth
 from bucketlist_api.models import User, BucketList, BucketListItem, save
+from bucketlist_api import create_app, db
+from bucketlist_api.config import DevConfig
 from datetime import datetime
 from custom_error import errors
 
-app = Flask(__name__, static_url_path='')
+app = create_app(DevConfig)
 api = Api(app, errors=errors)
 auth = HTTPBasicAuth()
 

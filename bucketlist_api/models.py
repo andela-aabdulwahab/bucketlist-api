@@ -3,16 +3,13 @@ from flask import Flask, abort, request, jsonify, g, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from passlib.apps import custom_app_context as pwd_context
-from bucketlist_api import create_app
+from bucketlist_api import create_app, db
 from bucketlist_api.config import DevConfig
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
 # initialization
 app = create_app(DevConfig)
-# extensions
-db = SQLAlchemy(app)
-
 
 def save(db_model=None):
     if db_model:
