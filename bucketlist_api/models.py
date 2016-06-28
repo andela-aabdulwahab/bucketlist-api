@@ -13,6 +13,7 @@ app = create_app(DevConfig)
 # extensions
 db = SQLAlchemy(app)
 
+
 def save(db_model=None):
     if db_model:
         db.session.add(db_model)
@@ -36,7 +37,7 @@ class User(db.Model):
     username = db.Column(db.String(50), nullable=False)
     password_hash = db.Column(db.String(70))
     bucketlists = db.relationship('BucketList', backref=db.backref('users',
-                                 lazy='joined'), lazy='dynamic')
+                                  lazy='joined'), lazy='dynamic')
 
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)
@@ -68,8 +69,9 @@ class User(db.Model):
         return user
 
     @classmethod
-    def get_user_with_token(cls, auth_data):
-        token = auth_data['username']
+    def get_user_with_token(cls, token):
+        if not token:
+            return None
         return cls.verify_token(token)
 
     @classmethod

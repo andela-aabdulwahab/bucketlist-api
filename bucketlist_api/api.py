@@ -92,7 +92,7 @@ class BucketListAPI(Resource):
         if data.get('is_public'):
             bucketlist.is_public = data['is_public']
         auth_data = request.authorization
-        user = User.get_user_with_token(auth_data).id
+        user = User.get_user_with_token(auth_data.get('username')).id
         bucketlist.user_id = user.id
         save(bucketlist)
         response = jsonify({'bucketlist': url_for('bucketlist',id=bucketlist.id,
@@ -104,7 +104,7 @@ class BucketListAPI(Resource):
         auth_data = request.authorization
         limit = request.args.get('limit', '20')
         page = request.args.get('page')
-        user = User.get_user_with_token(auth_data)
+        user = User.get_user_with_token(auth_data.get('username'))
         q = request.args.get('q')
         if id:
             bucketlist = BucketList.get_bucketlist(id=id, user_id=user.id)
@@ -119,7 +119,7 @@ class BucketListAPI(Resource):
     def put(self, id):
         auth_data = request.authorization
         data = self.parser.parse_args()
-        user = User.get_user_with_token(auth_data)
+        user = User.get_user_with_token(auth_data.get('username'))
         bucketlist = (BucketList.query.filter_by(id=id, user_id=user.id)
                                       .first())
         if bucketlist is None:
@@ -138,7 +138,7 @@ class BucketListAPI(Resource):
     def delete(self, id):
         auth_data = request.authorization
         data = self.parser.parse_args()
-        user = User.get_user_with_token(auth_data)
+        user = User.get_user_with_token(auth_data.get('username'))
         bucketlist = (BucketList.query.filter_by(id=id, user_id=user.id)
                                       .delete())
         if not bucketlist:
