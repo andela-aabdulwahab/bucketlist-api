@@ -38,11 +38,13 @@ class CreateUserAPI(Resource):
 
     def post(self):
         data = self.parser.parse_args()
-        new_user = User(username=data['username'])
-        new_user.hash_password(data['password'])
-        if User.user_exist(new_user.username):
+        username = data.get('username')
+        password = date.get('password')
+        if User.user_exist(username):
             abort(409, 'SignUpFailed: A User with the specified username '
                        'already exist')
+        new_user = User(username=username)
+        new_user.hash_password(password)
         save(new_user)
         token = new_user.generate_auth_token()
         response = jsonify({'token': token.decode('ascii')})
