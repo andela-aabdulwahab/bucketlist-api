@@ -16,6 +16,7 @@ from datetime import datetime
 from custom_error import errors
 
 app = create_app(DevConfig)
+
 api = Api(app, errors=errors)
 auth = HTTPBasicAuth()
 
