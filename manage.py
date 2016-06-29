@@ -1,17 +1,17 @@
 import os
 from flask import Flask
 from flask_script import Manager, Shell, Server
-from flask_migrate import  Migrate, MigrateCommand
+from flask_migrate import Migrate, MigrateCommand
 from flask_sqlalchemy import SQLAlchemy
-from bucketlist_api import models, create_app
+from bucketlist_api import models, create_app, db
 from bucketlist_api.config import DevConfig
 import nose
 
 app = create_app(DevConfig)
-db = models.db
 
 manager = Manager(app)
 migrate = Migrate(app, db)
+
 
 @manager.command
 def drop():
@@ -25,11 +25,13 @@ def create(default_data=True, sample_data=False):
     "Creates database tables from sqlalchemy models"
     db.create_all()
 
+
 @manager.command
 def test():
     """Run test for the application."""
     test_response = nose.run(argv=['--with-coverage'])
     return test_response
+
 
 @manager.shell
 def make_shell_context():
