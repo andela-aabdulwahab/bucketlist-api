@@ -29,4 +29,6 @@ class TestConfig(Config):
     ENV = 'test'
     TESTING = True
     DEBUG = True
+    PORT = 5000
+    HOST = '0.0.0.0'
     SQLALCHEMY_DATABASE_URI = 'sqlite://'

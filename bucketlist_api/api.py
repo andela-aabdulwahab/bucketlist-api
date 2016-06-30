@@ -10,14 +10,13 @@ from flask import Flask, jsonify, request, abort, make_response, url_for
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_httpauth import HTTPBasicAuth
 from bucketlist_api.models import User, BucketList, BucketListItem, save
-from bucketlist_api import create_app, db
+from bucketlist_api import create_app, db, api
 from bucketlist_api.config import DevConfig
 from datetime import datetime
-from custom_error import errors
+from bucketlist_api.custom_error import errors
 
 app = create_app(DevConfig)
 
-api = Api(app, errors=errors)
 auth = HTTPBasicAuth()
 
 
@@ -42,7 +41,7 @@ class CreateUserAPI(Resource):
     def post(self):
         data = self.parser.parse_args()
         username = data.get('username')
-        password = date.get('password')
+        password = data.get('password')
         if User.user_exist(username):
             abort(409, 'SignUpFailed: A User with the specified username '
                        'already exist')
@@ -218,8 +217,9 @@ class ItemListAPI(Resource):
 
 
 
-
-#build api end point to handle 405 that returns json
+# Todo
+# build api end point to handle 405 that returns json
+# merge bucketlists and bucketlist
 api.add_resource(CreateUserAPI, '/auth/register', endpoint='register')
 api.add_resource(LoginUserAPI, '/auth/login', endpoint='login')
 api.add_resource(BucketListAPI, '/bucketlists', endpoint='bucketlists')

@@ -9,7 +9,7 @@ sys.path.insert(0, parentdir)
 
 import json
 from base64 import b64encode
-from bucketlist_api.models import User, BucketList, BucketListItem
+import bucketlist_api.models
 import unittest
 from flask import url_for
 from bucketlist_api import create_app, db
