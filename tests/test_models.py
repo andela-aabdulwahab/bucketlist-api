@@ -78,3 +78,24 @@ class TestBucketListModels(unittest.TestCase):
         prev_date_modified = self.bucketlist.date_modified
         BucketList.update_bucketlist(self.bucketlist.id)
         self.assertNotEqual(prev_date_modified, self.bucketlist.date_created)
+
+
+class TestBucketListItemModels(unittest.TestCase):
+
+    def setUp(self):
+        self.app = create_app(TestConfig)
+        self.app.app_context().push()
+        db.create_all()
+        self.bucketlist_item = BucketListItem(name="See the great wall")
+        self.bucketlist_item.bucketlist_id = 1
+        db.session.add(self.bucketlist_item)
+        db.session.commit()
+
+    def test_bucketlist_item_init(self):
+        self.assertTrue(self.bucketlist_item.id > 0)
+
+    def test_build_item_list(self):
+        items = BucketListItem.query.all()
+        built_item = BucketListItem.build_item_list(items)
+        self.assertTrue(len(built_item) > 1)
+        self.assertEqual(built_item[0]['name'], self.bucketlist_item.name)
