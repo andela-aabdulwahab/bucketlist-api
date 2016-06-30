@@ -11,6 +11,7 @@ from itsdangerous import (TimedJSONWebSignatureSerializer
 # initialization
 app = create_app(DevConfig)
 
+
 def save(db_model=None):
     if db_model:
         db.session.add(db_model)
@@ -78,12 +79,13 @@ class User(db.Model):
         return False
 
     @staticmethod
-    def bucketlist_own_by_user(auth_data, bucketlist_id):
-        user = User.get_user_with_token(auth_data)
+    def bucketlist_own_by_user(token, bucketlist_id):
+        user = User.get_user_with_token(token)
         bucketlist = BucketList.query.filter_by(id=bucketlist_id).first()
         if not bucketlist or bucketlist.user_id != user.id:
             return False
         return True
+
 
 class BucketList(db.Model):
     """Provides the database Model for the BucketList.
@@ -103,7 +105,7 @@ class BucketList(db.Model):
     is_public = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     items = db.relationship('BucketListItem', backref=db.backref('bucketlist',
-                           lazy='joined'), lazy='dynamic')
+                            lazy='joined'), lazy='dynamic')
 
     @classmethod
     def build_bucketlist(cls, list_bucketlist):
@@ -122,7 +124,7 @@ class BucketList(db.Model):
 
     @staticmethod
     def get_bucketlist_items(bucketlist_id):
-        items = (BucketListItem.query.filter_by(bucketlist_id = bucketlist_id)
+        items = (BucketListItem.query.filter_by(bucketlist_id=bucketlist_id)
                                      .all())
         if not items:
             return []
@@ -151,15 +153,16 @@ class BucketList(db.Model):
                                          page=page_bucketlist.next_num, q=q,
                                          _method='GET', _external=True)
         if page_bucketlist.has_prev:
-            pagination['previous'] = url_for(endpoint='bucketlists',limit=limit,
-                                             page=page_bucketlist.prev_num, q=q,
-                                             _method='GET', _external=True)
+            pagination['previous'] = url_for(endpoint='bucketlists',
+                                             limit=limit, page=page_bucketlist
+                                             .prev_num, q=q, _method='GET',
+                                             _external=True)
         return [cls.build_bucketlist(bucketlist), pagination]
 
     @classmethod
     def get_bucketlist(cls, id=None, user_id=None, **kwargs):
         query = (cls.query.filter_by(user_id=user_id)
-                        .order_by(cls.date_modified.desc()))
+                    .order_by(cls.date_modified.desc()))
         if id:
             return cls.id_bucketlist(id, query)
         q = kwargs.get('q')
@@ -205,11 +208,11 @@ class BucketListItem(db.Model):
         item_list = []
         for item in items:
             item_dict = {
-            'id':item.id,
-            'name':item.name,
-            'date_created':item.date_created,
-            'date_modified':item.date_modified,
-            'done': item.done
+                'id': item.id,
+                'name': item.name,
+                'date_created': item.date_created,
+                'date_modified': item.date_modified,
+                'done': item.done
             }
             item_list.append(item_dict)
         return item_list
