@@ -158,3 +158,29 @@ class TestBucketListAPI(unittest.TestCase):
     def test_get_invalid_bucketlist(self):
         response, response_json = self.get_bucketlists("20")
         self.assertEqual(response.status_code, 404)
+
+    def test_put_bucketlists(self):
+        headers = self.authorization_header()
+        body = {
+            "is_public": True,
+            "name": "Travel to paris",
+          }
+        response = self.test_client.put('/bucketlists/1',
+                                        data=json.dumps(body), headers=headers)
+        response_json = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('bucketlist', response_json)
+
+    def test_put_invalid(self):
+        headers = self.authorization_header()
+        response = self.test_client.put('/bucketlists/20', headers=headers)
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_bucketlist(self):
+        headers = self.authorization_header()
+        body = {
+            "name": "Run a marathon"
+          }
+        post_response = self.send_post('/bucketlists', body, headers)
+        response = self.test_client.delete('/bucketlists/2', headers=headers)
+        self.assertEqual(response.status_code, 204)

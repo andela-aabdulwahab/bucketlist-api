@@ -136,8 +136,9 @@ class BucketListAPI(Resource):
             bucketlist.is_public = data['is_public']
         bucketlist.date_modified = datetime.now()
         save(bucketlist)
-        response = jsonify({'bucketlist': url_for('bucketlist',id=bucketlist.id,
-                            _external=True)})
+        response = jsonify({'bucketlist': url_for('api.bucketlists',
+                                                  id=bucketlist.id,
+                                                  _external=True)})
         response.status_code = 201
         return response
 
@@ -152,7 +153,7 @@ class BucketListAPI(Resource):
         items = (BucketListItem.query.filter_by(bucketlist_id = id).delete())
         save()
         response = jsonify({'message':'bucketlist deleted'})
-        response.status_code = 201
+        response.status_code = 204
         return response
 
 
