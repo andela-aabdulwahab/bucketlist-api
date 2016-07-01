@@ -54,17 +54,14 @@ class CreateUserAPI(Resource):
         return response
 
 
-
-
 class LoginUserAPI(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument('username', type=str, required=True,
-                                    location='json')
+                                 location='json')
         self.parser.add_argument('password', type=str, required=True,
-                                    location='json')
+                                 location='json')
         super(LoginUserAPI, self).__init__()
-
 
     def post(self):
         data = self.parser.parse_args()
@@ -75,7 +72,6 @@ class LoginUserAPI(Resource):
         return jsonify({'token': token.decode('ascii')})
 
 
-
 class BucketListAPI(Resource):
     decorators = [auth.login_required]
 
@@ -84,7 +80,6 @@ class BucketListAPI(Resource):
         self.parser.add_argument('name', type=str, location='json')
         self.parser.add_argument('is_public', type=bool, location='json')
         self.parser.add_argument('Authorization', location='headers')
-
 
     def post(self):
         data = self.parser.parse_args()
@@ -150,9 +145,9 @@ class BucketListAPI(Resource):
                                       .delete())
         if not bucketlist:
             abort(404, "DeleteFailed: No bucketlist with the specified id")
-        items = (BucketListItem.query.filter_by(bucketlist_id = id).delete())
+        items = (BucketListItem.query.filter_by(bucketlist_id=id).delete())
         save()
-        response = jsonify({'message':'bucketlist deleted'})
+        response = jsonify({'message': 'bucketlist deleted'})
         response.status_code = 204
         return response
 
@@ -171,6 +166,8 @@ class ItemListAPI(Resource):
         if not User.bucketlist_own_by_user(token, id):
             abort(401, "NotPermitted: You can't access bucketlist belonging to"
                        " other users")
+        if not data.get('name'):
+            abort(400, 'itemNotCreated: Name not specified for items')
         item = BucketListItem(name=data['name'], bucketlist_id=id)
         item.date_created = datetime.now()
         item.date_modified = datetime.now()
@@ -197,7 +194,6 @@ class ItemListAPI(Resource):
         save(item)
         BucketList.update_bucketlist(id)
         response = jsonify({'bucketlist': url_for('api.bucketlists', id=id)})
-        response.status_code = 200
         return response
 
     def delete(self, id, item_id):
@@ -212,7 +208,7 @@ class ItemListAPI(Resource):
         BucketList.update_bucketlist(id)
         save()
         response = jsonify({'bucketlist': url_for('api.bucketlists', id=id)})
-        response.status_code = 200
+        response.status_code = 204
         return response
 
 
