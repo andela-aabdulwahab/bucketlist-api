@@ -9,7 +9,7 @@ sys.path.insert(0, parentdir)
 
 import json
 from base64 import b64encode
-import bucketlist_api.models
+from bucketlist_api.models import User, BucketList, BucketListItem
 import unittest
 from flask import url_for
 from bucketlist_api import create_app, db
@@ -37,6 +37,13 @@ class Testmodels(unittest.TestCase):
     def test_get_user(self):
         user = User.get_user("tester", "wahab")
         self.assertIsNotNone(user)
+
+    def test_verify_token(self):
+        self.assertTrue(User.verify_token(self.token))
+
+    def test_verify_invalid_token(self):
+        invalid_token = "this-is-no-way-a-token-nvnfovndsvnsdjn"
+        self.assertFalse(User.verify_token(invalid_token))
 
     def test_get_user_with_token(self):
         user = User.get_user_with_token(self.token)
