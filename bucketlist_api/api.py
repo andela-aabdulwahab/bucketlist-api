@@ -157,7 +157,6 @@ class BucketListAPI(Resource):
         return response
 
 
-
 class ItemListAPI(Resource):
     decorators = [auth.login_required]
 
@@ -168,26 +167,26 @@ class ItemListAPI(Resource):
 
     def post(self, id):
         data = self.parser.parse_args()
-        auth_data = request.authorization
-        if not User.bucketlist_own_by_user(auth_data, id):
+        token = request.authorization.get('username')
+        if not User.bucketlist_own_by_user(token, id):
             abort(401, "NotPermitted: You can't access bucketlist belonging to"
                        " other users")
         item = BucketListItem(name=data['name'], bucketlist_id=id)
         item.date_created = datetime.now()
         item.date_modified = datetime.now()
         save(item)
-        response = jsonify({'item':item.id})
+        response = jsonify({'bucketlist': url_for('api.bucketlists', id=id)})
         response.status_code = 201
         return response
 
     def put(self, id, item_id):
-        auth_data = request.authorization
+        token = request.authorization.get('username')
         data = self.parser.parse_args()
-        if not User.bucketlist_own_by_user(auth_data, id):
+        if not User.bucketlist_own_by_user(token, id):
             abort(401, "NotPermitted: You can't access bucketlist belonging to"
                        " other users")
         item = (BucketListItem.query.filter_by(id=item_id, bucketlist_id=id)
-                                   .first())
+                .first())
         if not item:
             abort(404, "UpdateFailed: Item with the specified id not found")
         if data.get('name'):
@@ -197,13 +196,13 @@ class ItemListAPI(Resource):
         item.date_modified = datetime.now()
         save(item)
         BucketList.update_bucketlist(id)
-        response = jsonify({'item':item.id})
+        response = jsonify({'bucketlist': url_for('api.bucketlists', id=id)})
         response.status_code = 200
         return response
 
     def delete(self, id, item_id):
-        auth_data = request.authorization
-        if not User.bucketlist_own_by_user(auth_data, id):
+        token = request.authorization.get('username')
+        if not User.bucketlist_own_by_user(token, id):
             abort(401, "NotPermitted: You can't access bucketlist belonging to"
                        " other users")
         item = BucketListItem.query.filter_by(id=item_id,
@@ -212,12 +211,9 @@ class ItemListAPI(Resource):
             abort(404, "DeleteFailed: Item with the specified id not found")
         BucketList.update_bucketlist(id)
         save()
-        response = jsonify({'item': item})
+        response = jsonify({'bucketlist': url_for('api.bucketlists', id=id)})
         response.status_code = 200
         return response
-
-
-
 
 
 # Todo
