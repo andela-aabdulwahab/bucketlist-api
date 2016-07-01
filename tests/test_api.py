@@ -75,9 +75,6 @@ class TestAuthentication(unittest.TestCase):
         response = self.send_post('/auth/login', body)
         self.assertEqual(response.status_code, 401)
 
-    def test_invalid_token(self):
-        pass
-
 
 class TestBucketListAPI(unittest.TestCase):
 
@@ -145,7 +142,11 @@ class TestBucketListAPI(unittest.TestCase):
 
     def test_unauthorize_access(self):
         response = self.test_client.post('/bucketlists')
+        error = ('"{\\n  \\"Error\\": \\"Invalid token Supplied or token has '
+                 'expired, Login again to get access token\\"\\n}\\n"')
+        response_json = json.dumps(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 401)
+        self.assertEqual(error, response_json)
 
     def test_bucketlist_name_required(self):
         headers = self.authorization_header()
