@@ -79,6 +79,36 @@ class LoginUserAPI(Resource):
         return jsonify({'token': token.decode('ascii')})
 
 
+class HelpAPI(Resource):
+
+    def get(self):
+        help_message = {
+            "message": "Access the app with url provided",
+            "register": {
+                "methods": "POST",
+                "url": "auth/register",
+                "PublicAccess": True,
+             },
+            "login": {
+                "methods": "POST",
+                "url": "/auth/login",
+                "PublicAccess": True,
+              },
+            "bucketlists": {
+                "methods": "GET, POST, PUT, DELETE",
+                "url": ["/bucketlists", "/bucketlists/<int:id>"],
+                "Public Access": False,
+             },
+            "items": {
+                "methods": "POST, PUT, DELETE",
+                "url": ["/bucketlists/<int:id>/items",
+                        "/bucketlists/<int:id>/items/<int:item_id>"],
+                "PublicAccess": False,
+             },
+        }
+        return jsonify(help_message)
+
+
 class BucketListAPI(Resource):
     decorators = [auth.login_required]
 
@@ -220,17 +250,13 @@ class ItemListAPI(Resource):
 
 
 # Todo
-# build api end point to handle 405 that returns json
-# merge bucketlists and bucketlist
-# build a help url
+api.add_resource(HelpAPI, '/help', endpoint='help')
 api.add_resource(CreateUserAPI, '/auth/register', endpoint='register')
 api.add_resource(LoginUserAPI, '/auth/login', endpoint='login')
-api.add_resource(BucketListAPI, '/bucketlists', endpoint='bucketlists')
-api.add_resource(BucketListAPI, '/bucketlists/<int:id>', endpoint='bucketlist')
+api.add_resource(BucketListAPI, '/bucketlists', '/bucketlists/<int:id>',
+                 endpoint='bucketlists')
 api.add_resource(ItemListAPI, '/bucketlists/<int:id>/items',
-                 endpoint='items')
-api.add_resource(ItemListAPI, '/bucketlists/<int:id>/items/<int:item_id>',
-                 endpoint='item')
+                 '/bucketlists/<int:id>/items/<int:item_id>', endpoint='items')
 
 if __name__ == '__main__':
     app.run(debug=True)
