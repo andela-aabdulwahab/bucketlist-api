@@ -29,7 +29,7 @@ class Testmodels(unittest.TestCase):
         self.token = self.user.generate_auth_token()
 
     def test_user_model(self):
-        self.assertTrue(self.user.id > 0)
+        self.assertGreater(self.user.id, 0)
 
     def test_verify_password(self):
         self.assertTrue(self.user.verify_password("wahab"))
@@ -65,13 +65,13 @@ class TestBucketListModels(unittest.TestCase):
         db.session.commit()
 
     def test_bucketlist_init(self):
-        self.assertTrue(self.bucketlist.id > 0)
+        self.assertGreater(self.bucketlist.id, 0)
 
     def test_build_bucketlist(self):
         bucketlist_dict = BucketList.build_bucketlist([self.bucketlist])
         bucketlist_name = bucketlist_dict[self.bucketlist.id]["name"]
         self.assertTrue(type(bucketlist_dict) is dict)
-        self.assertTrue(len(bucketlist_dict) > 0)
+        self.assertGreater(len(bucketlist_dict), 0)
         self.assertEqual(bucketlist_name, "Travel the World")
 
     def test_get_bucketlist_id(self):
@@ -86,6 +86,14 @@ class TestBucketListModels(unittest.TestCase):
         BucketList.update_bucketlist(self.bucketlist.id)
         self.assertNotEqual(prev_date_modified, self.bucketlist.date_created)
 
+    def test_bucketlist_not_own_by_user(self):
+        user = User(username="tester2")
+        user.hash_password("wahab")
+        db.session.add(user)
+        db.session.commit()
+        token = user.generate_auth_token()
+        User.bucketlist_own_by_user(token, 1)
+
 
 class TestBucketListItemModels(unittest.TestCase):
 
@@ -93,9 +101,16 @@ class TestBucketListItemModels(unittest.TestCase):
         self.app = create_app(TestConfig)
         self.app.app_context().push()
         db.create_all()
+        self.bucketlist = BucketList(name="Travel the world")
+        db.session.add(self.bucketlist)
         self.bucketlist_item = BucketListItem(name="See the great wall")
-        self.bucketlist_item.bucketlist_id = 1
+        self.bucketlist_item.bucketlist_id = self.bucketlist.id
         db.session.add(self.bucketlist_item)
+        db.session.commit()
+
+    def tearDown(self):
+        BucketList.query.filter_by(id=self.bucketlist.id).delete()
+        BucketListItem.query.filter_by(id=self.bucketlist_item.id)
         db.session.commit()
 
     def test_bucketlist_item_init(self):
@@ -104,5 +119,9 @@ class TestBucketListItemModels(unittest.TestCase):
     def test_build_item_list(self):
         items = BucketListItem.query.all()
         built_item = BucketListItem.build_item_list(items)
-        self.assertTrue(len(built_item) > 1)
+        self.assertGreater(len(built_item), 1)
         self.assertEqual(built_item[0]['name'], self.bucketlist_item.name)
+
+    def test_get_bucketlist_items(self):
+        items = BucketList.get_bucketlist_items(self.bucketlist_item.bucketlist_id)
+        self.assertGreater(len(items), 0)

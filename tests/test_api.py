@@ -150,6 +150,18 @@ class TestBucketListAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertGreater(len(response_json['bucketlists']), 0)
 
+    def test_get_bucketlists_pagination(self):
+        headers = self.authorization_header()
+        body = {"name": "For Work"}
+        body2 = {"name": "For Relationship"}
+        bucketlist = send_post('/bucketlists', body, headers=headers)
+        bucketlist = send_post('/bucketlists', body2, headers=headers)
+        response = self.test_client.get('/bucketlists?limit=1?page=2',
+                                        headers=headers)
+        response_json = json.dumps(response.data.decode('utf-8'))
+        self.assertIn('next', response_json)
+        self.assertIn('previous', response_json)
+
     def test_get_id_bucketlist(self):
         response, response_json = self.get_bucketlists("1")
         self.assertEqual(response.status_code, 200)

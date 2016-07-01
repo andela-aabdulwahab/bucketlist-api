@@ -68,8 +68,6 @@ class User(db.Model):
 
     @classmethod
     def get_user_with_token(cls, token):
-        if not token:
-            return None
         return cls.verify_token(token)
 
     @classmethod
@@ -149,11 +147,12 @@ class BucketList(db.Model):
             'total_number_of_bucketlists': page_bucketlist.total,
         }
         if page_bucketlist.has_next:
-            pagination['next'] = url_for(endpoint='bucketlists', limit=limit,
+            pagination['next'] = url_for(endpoint='api.bucketlists',
+                                         limit=limit,
                                          page=page_bucketlist.next_num, q=q,
                                          _method='GET', _external=True)
         if page_bucketlist.has_prev:
-            pagination['previous'] = url_for(endpoint='bucketlists',
+            pagination['previous'] = url_for(endpoint='api.bucketlists',
                                              limit=limit, page=page_bucketlist
                                              .prev_num, q=q, _method='GET',
                                              _external=True)
