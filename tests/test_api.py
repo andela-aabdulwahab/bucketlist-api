@@ -36,7 +36,7 @@ class TestAuthentication(unittest.TestCase):
         self.body = {
             "username": "malikwahab",
             "password": "malik123",
-        }
+          }
         self.test_client = self.app.test_client()
         self.response = self.send_post('/auth/register', self.body)
 
@@ -71,6 +71,90 @@ class TestAuthentication(unittest.TestCase):
         body = {
             "username": "malik",
             "password": "invalid"
-        }
+          }
         response = self.send_post('/auth/login', body)
         self.assertEqual(response.status_code, 401)
+
+class TestBucketListAPI(unittest.TestCase):
+
+    def setUp(self):
+        self.app = create_app(TestConfig)
+        self.app.app_context().push()
+        api.add_resource(CreateUserAPI, '/auth/register', endpoint='register')
+        api.add_resource(BucketListAPI, '/bucketlists',
+                                        '/bucketlists/<int:id>',
+                                        endpoint='bucketlists')
+        db.create_all()
+        self.test_client = self.app.test_client()
+        self.token = self.register_a_user()
+        self.response = self.post_a_bucketlist()
+
+    def tearDown(self):
+        User.query.filter_by(username='wahabmalik').delete()
+
+    def send_post(self, url, body, headers=None):
+        response = self.test_client.post(url,
+                                         data=json.dumps(body),
+                                         content_type="application/json",
+                                         headers=headers)
+        return response
+
+    def register_a_user(self):
+        body = {
+            "username": "wahabmalik",
+            "password": "malik123",
+          }
+        response = self.send_post('/auth/register', body)
+        response_json = json.loads(response.data.decode('utf-8'))
+        return response_json['token']
+
+    def post_a_bucketlist(self):
+        headers = self.authorization_header()
+        body = {
+            "name": "Travel the world",
+          }
+        response = self.send_post('/bucketlists', body, headers)
+        return response
+
+    def authorization_header(self):
+        headers = {
+            'Authorization': 'Basic ' + (b64encode((self.token+':unused')
+                                                   .encode('utf-8'))
+                                         .decode('utf-8'))
+          }
+        return headers
+
+    def get_bucketlists(self, id=None):
+        headers = self.authorization_header()
+        if id:
+            response = response = self.test_client.get('/bucketlists/'+id,
+                                                       headers=headers)
+        else:
+            response = self.test_client.get('/bucketlists', headers=headers)
+        response_json = json.loads(response.data.decode('utf-8'))
+        return response, response_json
+
+    def test_post_bucketlist(self):
+        self.assertEqual(self.response.status_code, 201)
+
+    def test_unauthorize_access(self):
+        response = self.test_client.post('/bucketlists')
+        self.assertEqual(response.status_code, 401)
+
+    def test_bucketlist_name_required(self):
+        headers = self.authorization_header()
+        response = self.test_client.post('/bucketlists', headers=headers)
+
+    def test_get_bucketlists(self):
+        response, response_json = self.get_bucketlists()
+        self.assertEqual(response.status_code, 200)
+        self.assertGreater(len(response_json['bucketlists']), 0)
+
+    def test_get_id_bucketlist(self):
+        response, response_json = self.get_bucketlists("1")
+        self.assertEqual(response.status_code, 200)
+        self.assertGreater(len(response_json['bucketlists']), 0)
+
+    def test_get_invalid_bucketlist(self):
+        response, response_json = self.get_bucketlists("20")
+        self.assertEqual(response.status_code, 404)

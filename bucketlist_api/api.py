@@ -89,18 +89,20 @@ class BucketListAPI(Resource):
     def post(self):
         data = self.parser.parse_args()
         if not data.get('name'):
-            abort(400, 'BucketListNotCreated: Name not specified for bucketlist')
+            abort(400, 'BucketListNotCreated: Name not specified'
+                       'for bucketlist')
         bucketlist = BucketList(name=data['name'], is_public=False)
         bucketlist.date_created = datetime.now()
         bucketlist.date_modified = datetime.now()
         if data.get('is_public'):
             bucketlist.is_public = data['is_public']
         auth_data = request.authorization
-        user = User.get_user_with_token(auth_data.get('username')).id
+        user = User.get_user_with_token(auth_data.get('username'))
         bucketlist.user_id = user.id
         save(bucketlist)
-        response = jsonify({'bucketlist': url_for('bucketlist',id=bucketlist.id,
-                            _external=True)})
+        response = jsonify({'bucketlist': url_for('api.bucketlists',
+                                                  id=bucketlist.id,
+                                                  _external=True)})
         response.status_code = 201
         return response
 
@@ -118,7 +120,7 @@ class BucketListAPI(Resource):
         if len(bucketlist[0]) < 1:
             abort(404, "NotFound: No bucketlist that satisfy the specified"
                        " parameter found")
-        return jsonify({'bucketlist': bucketlist})
+        return jsonify({'bucketlists': bucketlist})
 
     def put(self, id):
         auth_data = request.authorization
@@ -204,7 +206,7 @@ class ItemListAPI(Resource):
             abort(401, "NotPermitted: You can't access bucketlist belonging to"
                        " other users")
         item = BucketListItem.query.filter_by(id=item_id,
-                                           bucketlist_id=item_id).delete()
+                                              bucketlist_id=item_id).delete()
         if not item:
             abort(404, "DeleteFailed: Item with the specified id not found")
         BucketList.update_bucketlist(id)
@@ -220,6 +222,7 @@ class ItemListAPI(Resource):
 # Todo
 # build api end point to handle 405 that returns json
 # merge bucketlists and bucketlist
+# build a help url
 api.add_resource(CreateUserAPI, '/auth/register', endpoint='register')
 api.add_resource(LoginUserAPI, '/auth/login', endpoint='login')
 api.add_resource(BucketListAPI, '/bucketlists', endpoint='bucketlists')
