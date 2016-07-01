@@ -14,7 +14,7 @@ import unittest
 from flask import url_for
 from bucketlist_api import create_app, db
 from bucketlist_api.config import TestConfig
-
+import time
 
 class Testmodels(unittest.TestCase):
 
@@ -45,6 +45,11 @@ class Testmodels(unittest.TestCase):
         invalid_token = "this-is-no-way-a-token-nvnfovndsvnsdjn"
         self.assertFalse(User.verify_token(invalid_token))
 
+    def test_expired_token(self):
+        token = self.user.generate_auth_token(expiration=1)
+        time.sleep(2)
+        self.assertFalse(self.user.verify_token(token))
+
     def test_get_user_with_token(self):
         user = User.get_user_with_token(self.token)
         self.assertEqual(user.id, self.user.id)
@@ -60,7 +65,7 @@ class TestBucketListModels(unittest.TestCase):
         self.app.app_context().push()
         db.create_all()
         self.bucketlist = BucketList(name="Travel the World")
-        self.bucketlist.created_by = 1
+        self.bucketlist.user_id = 100
         db.session.add(self.bucketlist)
         db.session.commit()
 
@@ -87,12 +92,12 @@ class TestBucketListModels(unittest.TestCase):
         self.assertNotEqual(prev_date_modified, self.bucketlist.date_created)
 
     def test_bucketlist_not_own_by_user(self):
-        user = User(username="tester2")
+        user = User(username="tester")
         user.hash_password("wahab")
         db.session.add(user)
         db.session.commit()
         token = user.generate_auth_token()
-        User.bucketlist_own_by_user(token, 1)
+        self.assertFalse(User.bucketlist_own_by_user(token, 1))
 
 
 class TestBucketListItemModels(unittest.TestCase):

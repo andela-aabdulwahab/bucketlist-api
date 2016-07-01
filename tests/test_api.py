@@ -154,13 +154,23 @@ class TestBucketListAPI(unittest.TestCase):
         headers = self.authorization_header()
         body = {"name": "For Work"}
         body2 = {"name": "For Relationship"}
-        bucketlist = send_post('/bucketlists', body, headers=headers)
-        bucketlist = send_post('/bucketlists', body2, headers=headers)
-        response = self.test_client.get('/bucketlists?limit=1?page=2',
+        bucketlist = self.send_post('/bucketlists', body, headers=headers)
+        bucketlist = self.send_post('/bucketlists', body2, headers=headers)
+        response = self.test_client.get('/bucketlists?limit=1&page=2',
                                         headers=headers)
         response_json = json.dumps(response.data.decode('utf-8'))
+        BucketList.query.filter_by(id=2).delete()
+        BucketList.query.filter_by(id=3).delete()
         self.assertIn('next', response_json)
         self.assertIn('previous', response_json)
+
+    def test_get_bucketlists_search(self):
+        headers = self.authorization_header()
+        response = self.test_client.get('/bucketlists?q=travel&limit=200',
+                                        headers=headers)
+        response_json = json.dumps(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('bucketlist', response_json)
 
     def test_get_id_bucketlist(self):
         response, response_json = self.get_bucketlists("1")
