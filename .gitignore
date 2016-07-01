@@ -23,3 +23,7 @@ bucketlist.sqlite
 /tests/test_api.pyc
 /tests/helpers.py
 /tests/test_models.pyc
+
+#cover
+/cover
+.coverage
