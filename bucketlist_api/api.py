@@ -27,6 +27,13 @@ def authenticate_token(token, password):
     return False
 
 
+@auth.error_handler
+def unauthorize():
+    return make_response(jsonify({'Error': 'Invalid token Supplied or token '
+                                  'has expired, Login again to get access'
+                                  ' token'}), 401)
+
+
 class CreateUserAPI(Resource):
     """Register User to the app.
 
