@@ -14,15 +14,8 @@ import unittest
 from flask import url_for
 from bucketlist_api import create_app, db, api
 from bucketlist_api.config import TestConfig
-from bucketlist_api.api import CreateUserAPI, LoginUserAPI, BucketListAPI, ItemListAPI
-
-'''api.add_resource(LoginUserAPI, '/auth/login', endpoint='login')
-api.add_resource(BucketListAPI, '/bucketlists',
-                                '/bucketlists/<int:id>',
-                                endpoint='bucketlists')
-api.add_resource(ItemListAPI, '/bucketlists/<int:id>/items',
-                 '/bucketlists/<int:id>/items/<int:item_id>',
-                 endpoint='items')'''
+from bucketlist_api.api import (CreateUserAPI, LoginUserAPI, BucketListAPI,
+                                ItemListAPI, HelpAPI)
 
 
 class TestAuthentication(unittest.TestCase):
@@ -280,3 +273,18 @@ class TestItemAPI(unittest.TestCase):
         response = self.test_client.delete('/bucketlists/1/items/1',
                                            headers=headers)
         self.assertEqual(response.status_code, 204)
+
+
+class TestHelpAPI(unittest.TestCase):
+
+    def setUp(self):
+        self.app = create_app(TestConfig)
+        self.app.app_context().push()
+        api.add_resource(HelpAPI, '/help', endpoint='help')
+        self.test_client = self.app.test_client()
+
+    def test_get_help(self):
+        response = self.test_client.get('/help')
+        response_json = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("message", response_json)
