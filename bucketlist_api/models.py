@@ -161,10 +161,10 @@ class BucketList(db.Model):
 
     @classmethod
     def get_bucketlist(cls, id=None, user_id=None, **kwargs):
-        query = (cls.query.filter_by(user_id=user_id)
-                    .order_by(cls.date_modified.desc()))
+        query = cls.query.filter_by(user_id=user_id)
         if id:
             return cls.id_bucketlist(id, query)
+        query = query.order_by(cls.date_modified.desc())
         q = kwargs.get('q')
         if q:
             query = query.filter(cls.name.contains(q))
