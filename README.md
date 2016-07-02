@@ -19,8 +19,6 @@ Bucketlist Application API is an application for creating and managing a bucketl
 After cloning, create a virtual environment and install the requirements. For Linux and Mac users:
 
  ```sh
-$ git clone git@github.com:andela-aabdulwahab/bucketlist-api.git
-$ cd bucketlist_api
 $ virtualenv venv
 $ source venv/bin/activate
 $ pip install -r requirements
