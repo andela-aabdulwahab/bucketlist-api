@@ -65,7 +65,7 @@ class TestBucketListModels(unittest.TestCase):
         self.app.app_context().push()
         db.create_all()
         self.bucketlist = BucketList(name="Travel the World")
-        self.bucketlist.user_id = 100
+        self.bucketlist.user_id = 10
         db.session.add(self.bucketlist)
         db.session.commit()
 
@@ -90,14 +90,6 @@ class TestBucketListModels(unittest.TestCase):
         prev_date_modified = self.bucketlist.date_modified
         BucketList.update_bucketlist(self.bucketlist.id)
         self.assertNotEqual(prev_date_modified, self.bucketlist.date_created)
-
-    def test_bucketlist_not_own_by_user(self):
-        user = User(username="tester")
-        user.hash_password("wahab")
-        db.session.add(user)
-        db.session.commit()
-        token = user.generate_auth_token()
-        self.assertFalse(User.bucketlist_own_by_user(token, 1))
 
 
 class TestBucketListItemModels(unittest.TestCase):
@@ -128,5 +120,6 @@ class TestBucketListItemModels(unittest.TestCase):
         self.assertEqual(built_item[0]['name'], self.bucketlist_item.name)
 
     def test_get_bucketlist_items(self):
-        items = BucketList.get_bucketlist_items(self.bucketlist_item.bucketlist_id)
+        items = BucketList.get_bucketlist_items(self.bucketlist_item
+                                                .bucketlist_id)
         self.assertGreater(len(items), 0)

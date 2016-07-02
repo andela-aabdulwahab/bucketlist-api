@@ -203,6 +203,11 @@ class TestBucketListAPI(unittest.TestCase):
         response = self.test_client.delete('/bucketlists/1', headers=headers)
         self.assertEqual(response.status_code, 204)
 
+    def test_delete_bucketlist_invalid(self):
+        headers = self.authorization_header()
+        response = self.test_client.delete('/bucketlists/10', headers=headers)
+        self.assertEqual(response.status_code, 404)
+
 
 class TestItemAPI(unittest.TestCase):
 
@@ -218,7 +223,7 @@ class TestItemAPI(unittest.TestCase):
                          endpoint='items')
         db.create_all()
         self.test_client = self.app.test_client()
-        self.token = self.register_a_user()
+        self.token = self.register_a_user("wahabmalik")
         self.post_a_bucketlist()
         self.response = self.post_an_item()
 
@@ -234,9 +239,9 @@ class TestItemAPI(unittest.TestCase):
                                          headers=headers)
         return response
 
-    def register_a_user(self):
+    def register_a_user(self, username):
         body = {
-            "username": "wahabmalik",
+            "username": username,
             "password": "malik123",
           }
         response = self.send_post('/auth/register', body)
@@ -251,13 +256,26 @@ class TestItemAPI(unittest.TestCase):
         response = self.send_post('/bucketlists', body, headers)
         return response
 
-    def authorization_header(self):
+    def authorization_header(self, token=None):
+        if not token:
+            token = self.token
         headers = {
-            'Authorization': 'Basic ' + (b64encode((self.token+':unused')
+            'Authorization': 'Basic ' + (b64encode((token+':unused')
                                                    .encode('utf-8'))
                                          .decode('utf-8'))
           }
         return headers
+
+    def put_item(self, headers, id):
+        body = {
+            "name": "Climb the Eiffel Tower",
+            "done": True
+          }
+        response = self.test_client.put('/bucketlists/1/items/'+id,
+                                        data=json.dumps(body),
+                                        content_type="application/json",
+                                        headers=headers)
+        return response
 
     def post_an_item(self):
         headers = self.authorization_header()
@@ -278,23 +296,27 @@ class TestItemAPI(unittest.TestCase):
 
     def test_put_item(self):
         headers = self.authorization_header()
-        body = {
-            "name": "Climb the Eiffel Tower",
-            "done": True
-          }
-        response = self.test_client.put('/bucketlists/1/items/1',
-                                        data=json.dumps(body),
-                                        content_type="application/json",
-                                        headers=headers)
+        response = self.put_item(headers, '1')
         response_json = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
         self.assertIn('bucketlist', response_json)
+
+    def test_put_item_invalid(self):
+        headers = self.authorization_header()
+        response = self.put_item(headers, '2')
+        self.assertEqual(response.status_code, 404)
 
     def test_delete_bucketlist(self):
         headers = self.authorization_header()
         response = self.test_client.delete('/bucketlists/1/items/1',
                                            headers=headers)
         self.assertEqual(response.status_code, 204)
+
+    def test_delete_item_invalid(self):
+        headers = self.authorization_header()
+        response = self.test_client.delete('/bucketlists/1/items/10',
+                                           headers=headers)
+        self.assertEqual(response.status_code, 404)
 
 
 class TestHelpAPI(unittest.TestCase):
