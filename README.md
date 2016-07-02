@@ -2,6 +2,9 @@
 [![Coverage Status](https://coveralls.io/repos/github/andela-aabdulwahab/bucketlist-api/badge.svg?branch=develop)](https://coveralls.io/github/andela-aabdulwahab/bucketlist-api?branch=develop)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/andela-aabdulwahab/bucketlist-api/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/andela-aabdulwahab/bucketlist-api/?branch=develop)
 ## Bucketlist Application API
+Application for managing bucketlist, with API as interface
+
+### Introduction
 
 Bucketlist Application API is an application for creating and managing a bucketlist, with available API to perform the actions. Built with [flask-restful](http://flask-restful-cn.readthedocs.io/en/0.3.4/), it implements token Based Authentication for the API and only methods to register and login are accessible to unauthenticated users. Data is exchanged as JSON.
 
@@ -73,7 +76,7 @@ Access control mapping is listed below.
  </tr>
  </table>
 
- ### Set up
+### Set up
 
  Application works for both Python 2.7 and 3.*
 

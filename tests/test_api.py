@@ -31,7 +31,7 @@ class TestAuthentication(unittest.TestCase):
             "password": "malik123",
           }
         self.test_client = self.app.test_client()
-        self.response = self.send_post('/auth/register', self.body)
+        self.response = self.send_post('/v1/auth/register', self.body)
 
     def send_post(self, url, body):
         response = self.test_client.post(url,
@@ -50,12 +50,12 @@ class TestAuthentication(unittest.TestCase):
         self.assertIn('message', response_json)
 
     def test_user_exist(self):
-        second_response = self.send_post('/auth/register', self.body)
+        second_response = self.send_post('/v1/auth/register', self.body)
         response_json = json.loads(second_response.data.decode('utf-8'))
         self.assertEqual(second_response.status_code, 409)
 
     def test_login(self):
-        response = self.send_post('/auth/login', self.body)
+        response = self.send_post('/v1/auth/login', self.body)
         response_json = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
         self.assertIn('token', response_json)
@@ -65,7 +65,7 @@ class TestAuthentication(unittest.TestCase):
             "username": "malik",
             "password": "invalid"
           }
-        response = self.send_post('/auth/login', body)
+        response = self.send_post('/v1/auth/login', body)
         self.assertEqual(response.status_code, 401)
 
 
@@ -100,7 +100,7 @@ class TestBucketListAPI(unittest.TestCase):
             "username": "wahabmalik",
             "password": "malik123",
           }
-        response = self.send_post('/auth/register', body)
+        response = self.send_post('/v1/auth/register', body)
         response_json = json.loads(response.data.decode('utf-8'))
         return response_json['token']
 
@@ -109,7 +109,7 @@ class TestBucketListAPI(unittest.TestCase):
         body = {
             "name": "Travel the world",
           }
-        response = self.send_post('/bucketlists', body, headers)
+        response = self.send_post('/v1/bucketlists', body, headers)
         return response
 
     def authorization_header(self):
@@ -123,10 +123,10 @@ class TestBucketListAPI(unittest.TestCase):
     def get_bucketlists(self, id=None):
         headers = self.authorization_header()
         if id:
-            response = response = self.test_client.get('/bucketlists/'+id,
+            response = response = self.test_client.get('/v1/bucketlists/'+id,
                                                        headers=headers)
         else:
-            response = self.test_client.get('/bucketlists', headers=headers)
+            response = self.test_client.get('/v1/bucketlists', headers=headers)
         response_json = json.loads(response.data.decode('utf-8'))
         return response, response_json
 
@@ -134,7 +134,7 @@ class TestBucketListAPI(unittest.TestCase):
         self.assertEqual(self.response.status_code, 201)
 
     def test_unauthorize_access(self):
-        response = self.test_client.post('/bucketlists')
+        response = self.test_client.post('/v1/bucketlists')
         error = ('"{\\n  \\"Error\\": \\"Invalid token Supplied or token has '
                  'expired, Login again to get access token\\"\\n}\\n"')
         response_json = json.dumps(response.data.decode('utf-8'))
@@ -143,7 +143,7 @@ class TestBucketListAPI(unittest.TestCase):
 
     def test_bucketlist_name_required(self):
         headers = self.authorization_header()
-        response = self.test_client.post('/bucketlists', headers=headers)
+        response = self.test_client.post('/v1/bucketlists', headers=headers)
 
     def test_get_bucketlists(self):
         response, response_json = self.get_bucketlists()
@@ -154,9 +154,9 @@ class TestBucketListAPI(unittest.TestCase):
         headers = self.authorization_header()
         body = {"name": "For Work"}
         body2 = {"name": "For Relationship"}
-        bucketlist = self.send_post('/bucketlists', body, headers=headers)
-        bucketlist = self.send_post('/bucketlists', body2, headers=headers)
-        response = self.test_client.get('/bucketlists?limit=1&page=2',
+        bucketlist = self.send_post('/v1/bucketlists', body, headers=headers)
+        bucketlist = self.send_post('/v1/bucketlists', body2, headers=headers)
+        response = self.test_client.get('/v1/bucketlists?limit=1&page=2',
                                         headers=headers)
         response_json = json.dumps(response.data.decode('utf-8'))
         BucketList.query.filter_by(id=2).delete()
@@ -166,7 +166,7 @@ class TestBucketListAPI(unittest.TestCase):
 
     def test_get_bucketlists_search(self):
         headers = self.authorization_header()
-        response = self.test_client.get('/bucketlists?q=travel&limit=200',
+        response = self.test_client.get('/v1/bucketlists?q=travel&limit=200',
                                         headers=headers)
         response_json = json.dumps(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
@@ -187,7 +187,7 @@ class TestBucketListAPI(unittest.TestCase):
             "is_public": True,
             "name": "Travel to paris",
           }
-        response = self.test_client.put('/bucketlists/1',
+        response = self.test_client.put('/v1/bucketlists/1',
                                         data=json.dumps(body), headers=headers)
         response_json = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 201)
@@ -195,17 +195,19 @@ class TestBucketListAPI(unittest.TestCase):
 
     def test_put_invalid(self):
         headers = self.authorization_header()
-        response = self.test_client.put('/bucketlists/20', headers=headers)
+        response = self.test_client.put('/v1/bucketlists/20', headers=headers)
         self.assertEqual(response.status_code, 404)
 
     def test_delete_bucketlist(self):
         headers = self.authorization_header()
-        response = self.test_client.delete('/bucketlists/1', headers=headers)
+        response = self.test_client.delete('/v1/bucketlists/1',
+                                           headers=headers)
         self.assertEqual(response.status_code, 204)
 
     def test_delete_bucketlist_invalid(self):
         headers = self.authorization_header()
-        response = self.test_client.delete('/bucketlists/10', headers=headers)
+        response = self.test_client.delete('/v1/bucketlists/10',
+                                           headers=headers)
         self.assertEqual(response.status_code, 404)
 
 
@@ -244,7 +246,7 @@ class TestItemAPI(unittest.TestCase):
             "username": username,
             "password": "malik123",
           }
-        response = self.send_post('/auth/register', body)
+        response = self.send_post('/v1/auth/register', body)
         response_json = json.loads(response.data.decode('utf-8'))
         return response_json['token']
 
@@ -253,7 +255,7 @@ class TestItemAPI(unittest.TestCase):
         body = {
             "name": "Travel the world",
           }
-        response = self.send_post('/bucketlists', body, headers)
+        response = self.send_post('/v1/bucketlists', body, headers)
         return response
 
     def authorization_header(self, token=None):
@@ -271,7 +273,7 @@ class TestItemAPI(unittest.TestCase):
             "name": "Climb the Eiffel Tower",
             "done": True
           }
-        response = self.test_client.put('/bucketlists/1/items/'+id,
+        response = self.test_client.put('/v1/bucketlists/1/items/'+id,
                                         data=json.dumps(body),
                                         content_type="application/json",
                                         headers=headers)
@@ -282,7 +284,7 @@ class TestItemAPI(unittest.TestCase):
         body = {
             "name": "Visit Brazil",
           }
-        return self.send_post('/bucketlists/1/items', body, headers)
+        return self.send_post('/v1/bucketlists/1/items', body, headers)
 
     def test_post_item(self):
         self.assertEqual(self.response.status_code, 201)
@@ -291,7 +293,7 @@ class TestItemAPI(unittest.TestCase):
 
     def test_post_item_invalid(self):
         headers = self.authorization_header()
-        response = self.test_client.post('/bucketlists/1/items',
+        response = self.test_client.post('/v1/bucketlists/1/items',
                                          headers=headers)
 
     def test_put_item(self):
@@ -308,13 +310,13 @@ class TestItemAPI(unittest.TestCase):
 
     def test_delete_bucketlist(self):
         headers = self.authorization_header()
-        response = self.test_client.delete('/bucketlists/1/items/1',
+        response = self.test_client.delete('/v1/bucketlists/1/items/1',
                                            headers=headers)
         self.assertEqual(response.status_code, 204)
 
     def test_delete_item_invalid(self):
         headers = self.authorization_header()
-        response = self.test_client.delete('/bucketlists/1/items/10',
+        response = self.test_client.delete('/v1/bucketlists/1/items/10',
                                            headers=headers)
         self.assertEqual(response.status_code, 404)
 
@@ -328,7 +330,7 @@ class TestHelpAPI(unittest.TestCase):
         self.test_client = self.app.test_client()
 
     def test_get_help(self):
-        response = self.test_client.get('/help')
+        response = self.test_client.get('/v1/help')
         response_json = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
         self.assertIn("message", response_json)
