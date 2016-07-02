@@ -8,83 +8,30 @@ Application for managing bucketlist, with API as interface
 
 Bucketlist Application API is an application for creating and managing a bucketlist, with available API to perform the actions. Built with [flask-restful](http://flask-restful-cn.readthedocs.io/en/0.3.4/), it implements token Based Authentication for the API and only methods to register and login are accessible to unauthenticated users. Data is exchanged as JSON.
 
-Access control mapping is listed below.
-
-<table>
- <tr>
- <th> Functionality </th>
- <th> Endpoint</th>
- <th> Public Access</th>
- </tr>
- <tr>
- <td>Logs a user in</td>
- <td>POST /v1/auth/login</td>
- <td>True</td>
- </tr>
- <tr>
-  <td>Register a user</td>
-  <td>POST /v1/auth/register</td>
-  <td> True</td>
- </tr>
-
- <tr>
- <td>Create a new bucket list</td>
- <td>POST /v1/bucketlists/ </td>
- <td>False</td>
- </tr>
-
- <tr>
- <td>List all the created bucket lists</td>
- <td>GET /v1/bucketlists/ </td>
- <td>False</td>
- </tr>
-
- <tr>
- <td>Get single bucket list</td>
- <td>GET /v1/bucketlists/&lt;id&gt; </td>
- <td>False</td>
- </tr>
-
- <tr>
- <td>Update vthis bucket list</td>
- <td>PUT /v1/bucketlists/&lt;id&gt; </td>
- <td>False</td>
- </tr>
-
- <tr>
- <td>Delete this single bucket list</td>
- <td>DELETE /v1/bucketlists/&lt;id&gt; </td>
- <td>False</td>
- </tr>
-
- <tr>
- <td>Create new item in this bucket list</td>
- <td>POST /v1/bucketlists/&lt;id&gt;/items </td>
- <td>False</td>
- </tr>
-
- <tr>
- <td>Update a bucketlist item </td>
- <td>PUT /v1/bucketlists/&lt;id&gt;/items/&lt;item_id&gt; </td>
- <td>False</td>
- </tr>
-
- <tr>
- <td>Delete this item in this bucket list</td>
- <td>DELETE /v1/bucketlists/&lt;id&gt;/items/&lt;item_id&gt; </td>
- <td>False</td>
- </tr>
- </table>
-
 ### Set up
 
  Application works for both Python 2.7 and 3.*
+```sh
+ $ git clone git@github.com:andela-aabdulwahab/bucketlist-api.git
+ $ cd bucketlist_api
+ ```
+
+After cloning, create a virtual environment and install the requirements. For Linux and Mac users:
 
  ```sh
 $ git clone git@github.com:andela-aabdulwahab/bucketlist-api.git
 $ cd bucketlist_api
+$ virtualenv venv
+$ source venv/bin/activate
 $ pip install -r requirements
  ```
+ If you are on Windows, then use the following commands instead:
+
+ ```sh
+$ virtualenv venv
+$ venv\Scripts\activate
+(venv) $ pip install -r requirements.txt
+```
 
 ### Installation
 
@@ -92,7 +39,77 @@ $ pip install -r requirements
       - `python manage.py db create_db` to create the database  for the app.
       - `python manage.py db migrate` to create necessary tables in the database.
       - `python manage.py db upgrade` to apply migrated changes
-* Run ```python runserver.py``` to get the app running
+
+### Running
+
+      To run the server use the following command:
+```python runserver.py``` to get the app running
 
 ### Running Tests
 Run ```python manage.py test``` to run test and check coverage
+
+### API Documentation
+
+ - POST /v1/auth/register
+
+    Register a new user.<br>
+    The body must contain a JSON object that defines `username` and `password` fields.<br>
+    On success a status code 201 is returned. The body of the response contains a JSON object with a valid token for the new user.<br>
+    On failure status code 400 (bad request) is returned.<br>
+
+ - POST /v1/auth/login
+
+    Login an existing user.<br>
+    The body must contain a JSON object that defines `username` and `password` fields.<br>
+    On successful login a status code 201 is returned. The body of the response contains a JSON object with a valid token for the user.<br>
+    On failure status code 401 (unauthorize) is returned.<br>
+
+Basic Authentication required to access all API listed below. Or status code 401 (unauthorized) is returned.
+
+ - POST /v1/bucketlists/
+
+    Create a BucketList.<br>
+    The body must contain  a JSON object that defines `name` field and an optional `is_public` field.
+    On success a status code 200 is returned. The body of the response contains a JSON object with a link to the created bucket list endpoint
+    On failure status code 400 (bad request) is returned.<br>
+
+ - GET /v1/bucketlists/
+
+    Get all bucketlist of the User.<br>
+    On success a status code 200 is returned. The body of the response contains a JSON object containing the bucket lists
+    On failure status code 404 (Not found) is returned.<br>
+
+ - GET /v1/bucketlists/&lt;id&gt;
+
+    Get a specific bucketlist.<br>
+    On success a status code 200 is returned. The body of the response contains a JSON object containing the bucket list
+    On failure status code 404 (Not found) is returned.<br>
+
+ - PUT /v1/bucketlists/&lt;id&gt;
+
+    Update the bucket list specified.<br>
+    The body must contain  a JSON object that defines the field(s) to be modified.
+    On success a status code 201 is returned. On failure status code 404 (Not found) is returned.<br>
+
+ - DELETE /bucketlists/&lt;id&gt;
+
+    Delete the specified bucket list.<br>
+    On success a status code 201 is returned. On failure status code 404 (Not found) is returned.<br>
+
+ - POST /bucketlists/&lt;id&gt;/items/
+
+    Create an item in a Bucket list.<br>
+    The body must contain  a JSON object that defines `name` field and an optional `done` field.
+    On success a status code 200 is returned. The body of the response contains a JSON object with a link to the created bucket list endpoint
+    On failure status code 400 (bad request) is returned.<br>
+
+ - PUT /bucketlists/&lt;id&gt;/items/&lt;item_id&gt;
+
+    Update the specified item in the bucketlist<br>
+    The body must contain  a JSON object that defines the field(s) to be modified.
+    On success a status code 201 is returned. On failure status code 404 (Not found) is returned or 401(unauthorize) if bucketlist doesn't belong to the user.<br>
+
+ - DELETE /bucketlists/&lt;id&gt;/items/&lt;item_id&gt;
+
+    Delete the specified item in the bucket list.<br>
+    On success a status code 201 is returned. On failure status code 404 (Not found) is returned or 401(unauthorize) if bucketlist doesn't belong to the user.<br>
