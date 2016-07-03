@@ -5,15 +5,13 @@ currentdir = os.path.dirname(os.path.abspath(inspect.
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
-from werkzeug.http import parse_authorization_header
-from flask import Flask, jsonify, request, abort, make_response, url_for
-from flask_restful import Api, Resource, reqparse, fields, marshal
+from flask import jsonify, request, abort, make_response, url_for
+from flask_restful import Api, Resource, reqparse, fields
 from flask_httpauth import HTTPBasicAuth
 from bucketlist_api.models import User, BucketList, BucketListItem, save
-from bucketlist_api import create_app, db, api
+from bucketlist_api import create_app, api
 from bucketlist_api.config import DevConfig
 from datetime import datetime
-from bucketlist_api.custom_error import errors
 
 app = create_app(DevConfig)
 
@@ -176,7 +174,6 @@ class BucketListAPI(Resource):
 
     def delete(self, id):
         auth_data = request.authorization
-        data = self.parser.parse_args()
         user = User.get_user_with_token(auth_data.get('username'))
         bucketlist = (BucketList.query.filter_by(id=id, user_id=user.id)
                                       .delete())

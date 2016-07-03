@@ -1,8 +1,5 @@
-import os
-from flask import Flask
-from flask_script import Manager, Shell, Server
+from flask_script import Manager, Server
 from flask_migrate import Migrate, MigrateCommand
-from flask_sqlalchemy import SQLAlchemy
 from bucketlist_api import models, create_app, db
 from bucketlist_api.config import DevConfig
 import nose

@@ -1,6 +1,5 @@
 import os
-from flask import Flask, abort, request, jsonify, g, url_for
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, request, jsonify, g, url_for
 from datetime import datetime
 from passlib.apps import custom_app_context as pwd_context
 from bucketlist_api import create_app, db

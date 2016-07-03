@@ -9,9 +9,8 @@ sys.path.insert(0, parentdir)
 
 import json
 from base64 import b64encode
-from bucketlist_api.models import User, BucketList, BucketListItem, save
+from bucketlist_api.models import User, BucketList, BucketListItem
 import unittest
-from flask import url_for
 from bucketlist_api import create_app, db, api
 from bucketlist_api.config import TestConfig
 from bucketlist_api.api import (CreateUserAPI, LoginUserAPI, BucketListAPI,
@@ -144,6 +143,7 @@ class TestBucketListAPI(unittest.TestCase):
     def test_bucketlist_name_required(self):
         headers = self.authorization_header()
         response = self.test_client.post('/v1/bucketlists', headers=headers)
+        self.assertEqual(response.status_code, 400)
 
     def test_get_bucketlists(self):
         response, response_json = self.get_bucketlists()
@@ -154,7 +154,7 @@ class TestBucketListAPI(unittest.TestCase):
         headers = self.authorization_header()
         body = {"name": "For Work"}
         body2 = {"name": "For Relationship"}
-        bucketlist = self.send_post('/v1/bucketlists', body, headers=headers)
+        bucketlist1 = self.send_post('/v1/bucketlists', body, headers=headers)
         bucketlist = self.send_post('/v1/bucketlists', body2, headers=headers)
         response = self.test_client.get('/v1/bucketlists?limit=1&page=2',
                                         headers=headers)
