@@ -35,7 +35,7 @@ $ venv\Scripts\activate
 ### Installation
 
 * Make migrations by running the following commands.<br>
-      - `python manage.py db create_db` to create the database  for the app.
+      - `python manage.py db init` to create the database  for the app.
       - `python manage.py db migrate` to create necessary tables in the database.
       - `python manage.py db upgrade` to apply migrated changes
 
