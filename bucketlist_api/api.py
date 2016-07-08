@@ -259,7 +259,8 @@ class ItemListAPI(Resource):
         item.date_created = datetime.now()
         item.date_modified = datetime.now()
         save(item)
-        response = jsonify({'bucketlist': url_for('api.bucketlists', id=id)})
+        response = jsonify({'bucketlist': url_for('api.bucketlists', id=id,
+                            _external=True)})
         response.status_code = 201
         return response
 
@@ -280,7 +281,8 @@ class ItemListAPI(Resource):
         item.date_modified = datetime.now()
         save(item)
         BucketList.update_bucketlist(id)
-        response = jsonify({'bucketlist': url_for('api.bucketlists', id=id)})
+        response = jsonify({'bucketlist': url_for('api.bucketlists', id=id,
+                            _external=True)})
         return response
 
     def delete(self, id, item_id):
@@ -294,7 +296,8 @@ class ItemListAPI(Resource):
             abort(404, "DeleteFailed: Item with the specified id not found")
         BucketList.update_bucketlist(id)
         save()
-        response = jsonify({'bucketlist': url_for('api.bucketlists', id=id)})
+        response = jsonify({'bucketlist': url_for('api.bucketlists', id=id,
+                            _external=True)})
         response.status_code = 204
         return response
 
