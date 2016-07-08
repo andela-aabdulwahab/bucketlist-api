@@ -12,6 +12,11 @@ app = create_app(DevConfig)
 
 
 def save(db_model=None):
+    """Save and commit Model changes to Database.
+
+    Arguments:
+        db_model: Object of type Model
+    """
     if db_model:
         db.session.add(db_model)
     db.session.commit()
@@ -27,6 +32,8 @@ class User(db.Model):
         id: [int] id of the user in the database
         username: [String] username of the user
         password_hash: [String] Hashed version of the user password
+        bucketlists: [Model Fk] ForeignKey relationship between User and
+                     BucketList
 
     """
     __tablename__ = 'users'
@@ -37,17 +44,47 @@ class User(db.Model):
                                   lazy='joined'), lazy='dynamic')
 
     def hash_password(self, password):
+        """Encrypt the User password.
+
+        Arguments:
+            password: [String] string Representing the User password
+        """
         self.password_hash = pwd_context.encrypt(password)
 
     def verify_password(self, password):
+        """Verify input password with the Hashed password.
+
+        Arguments:
+            password: [String] string Representing the User password
+
+        Return:
+            Boolean. Representing the status of the password check
+        """
         return pwd_context.verify(password, self.password_hash)
 
     def generate_auth_token(self, expiration=20000):
+        """Generate Authentication Token.
+
+        Arguments:
+            expiration: [Int] The token expiry time in second
+
+        Return:
+            Token: [String] The generated token
+        """
         s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
         return s.dumps({'id': self.id})
 
     @staticmethod
     def verify_token(token):
+        """Verify the State of the Token.
+        Check if the token is valid and hasn't exipred
+
+        Arguments:
+            token: [String]
+
+        Return:
+            user [Model] User Model containing the user information
+        """
         s = Serializer(app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
@@ -60,6 +97,15 @@ class User(db.Model):
 
     @staticmethod
     def get_user(username, password):
+        """Get the user with specified username.
+
+        Arguments:
+            username: [string] username of the user to get_user
+            password: [string] a valid password of that user
+
+        Return:
+            user [Model] User Model containing the user information
+        """
         user = User.query.filter_by(username=username).first()
         if user is None or not user.verify_password(password):
             return None
@@ -67,16 +113,41 @@ class User(db.Model):
 
     @classmethod
     def get_user_with_token(cls, token):
+        """Get a user with the token provided.
+
+        Arguments:
+            token: [string]
+
+        Return:
+            user [Model] User Model containing the user information
+        """
         return cls.verify_token(token)
 
     @classmethod
     def user_exist(cls, username):
+        """Verify if a user already exist in the Database.
+
+        Arguments:
+            token: [string]
+
+        Return:
+            [Boolean] Representing the status of the user existence
+        """
         if cls.query.filter_by(username=username).first():
             return True
         return False
 
     @staticmethod
     def bucketlist_own_by_user(token, bucketlist_id):
+        """Verify if a given bucketlist is own by user.
+
+        Arguments:
+            token: [string] token of the user to check the bucketlist against
+            bucketlist_id: [string] The BucketList Id
+
+        Return:
+            [Boolean] the status of the check
+        """
         user = User.get_user_with_token(token)
         bucketlist = BucketList.query.filter_by(id=bucketlist_id).first()
         if not bucketlist or bucketlist.user_id != user.id:
@@ -88,10 +159,16 @@ class BucketList(db.Model):
     """Provides the database Model for the BucketList.
 
     Attributes:
-        user_id: [int] the user id of the foreign key
+        id: [int] the Database generated id
+        name: [String] the the title of the bucketlist
+        date_created: [datetime] The date bucketlist was created
+        date_modified: [datetime] The last modified date
+        is_public: [Boolean] Is availability to the user
+        user_id: [int] the foreign key user id
+        item: [Model Fk] The bucketlist-item relationship
 
     Inherits:
-        ItemsModel
+        db.Model
 
     """
     __tablename__ = 'bucketlist'
@@ -106,6 +183,15 @@ class BucketList(db.Model):
 
     @classmethod
     def build_bucketlist(cls, list_bucketlist):
+        """Covert a list of BucketList model object into python Dictionary
+        Object.
+
+        Arguments:
+            list_bucketlist: [List] contains object of the BucketList Model
+
+        Return:
+            [Dict] bucketlist as dictionary
+        """
         bucketlist_dict = {}
         for bucketlist in list_bucketlist:
             bucketlist_dict[bucketlist.id] = {
@@ -121,6 +207,14 @@ class BucketList(db.Model):
 
     @staticmethod
     def get_bucketlist_items(bucketlist_id):
+        """Get the items belonging to the specified bucketlist.
+
+        Argument:
+            bucketlist_id: [int] the Id of the bucketlist
+
+        Return:
+            [Dict] of items belonging to the user
+        """
         items = (BucketListItem.query.filter_by(bucketlist_id=bucketlist_id)
                                      .all())
         if not items:
@@ -129,6 +223,16 @@ class BucketList(db.Model):
 
     @classmethod
     def id_bucketlist(cls, id, query):
+        """Get bucketlist with a specified id.
+        Arguments:
+            id: [int] id of the bucketlist to Get
+            query: [sqlalchemy query] the query to build on
+
+        Return:
+            [list] a list containing the bucketlist and pagination properties,
+            none in this case
+
+        """
         bucketlist = query.filter_by(id=id).first()
         if bucketlist is None:
             bucketlist = []
@@ -138,6 +242,14 @@ class BucketList(db.Model):
 
     @classmethod
     def paginate_bucketlist(cls, query, page, limit, q):
+        """paginate the bucketlist return from a query.
+
+        Arguments:
+            query: [sqlalchemy query] the query to build on
+            page: [int] page number
+            limit: [int] the number of return to return
+            q: [string] the optional search parameter
+        """
         page_bucketlist = query.paginate(page=page, per_page=limit)
         bucketlist = page_bucketlist.items
         pagination = {
@@ -159,6 +271,15 @@ class BucketList(db.Model):
 
     @classmethod
     def get_bucketlist(cls, id=None, user_id=None, **kwargs):
+        """Get a bucketlist from the database.
+
+        Arguments:
+            id: [int]
+            user_id: [int] Id of the user making thr request
+            **kwargs: keyword arguments consisting of page, limit and q
+        Return:
+            [list] containing the bucketlist dictionary and pagination ppt
+        """
         query = cls.query.filter_by(user_id=user_id)
         if id:
             return cls.id_bucketlist(id, query)
@@ -187,10 +308,15 @@ class BucketListItem(db.Model):
     """Provides the database Model for the items on the BucketList Items.
 
     Inherits:
-        ItemModel
+        db.Model
 
     Attributes:
-        bucketlist_id: [int] it of the bucktelist it belongs to
+        id: [int] Id generated by the database
+        bucketlist_id: [int] it of the bucketlist it belongs to
+        name: [string] the title of the Item
+        done: [Boolean]
+        date_created: [datetime] The date item was created
+        date_modified: [datetime] The last modified date
 
     """
     __tablename__ = 'items'
@@ -203,6 +329,15 @@ class BucketListItem(db.Model):
 
     @staticmethod
     def build_item_list(items):
+        """Build a list of the items dictionary.
+
+        Arguments:
+            items: [List] a list of BucketListItem Model
+
+        Return:
+            [list] a list of items dictionary
+
+        """
         item_list = []
         for item in items:
             item_dict = {

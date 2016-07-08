@@ -1,7 +1,8 @@
 import os, sys, inspect
 
+# Append Curent path to the system path to allow model visibility
 currentdir = os.path.dirname(os.path.abspath(inspect.
-    getfile(inspect.currentframe())))
+                             getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
@@ -13,13 +14,16 @@ from bucketlist_api import create_app, api
 from bucketlist_api.config import DevConfig
 from datetime import datetime
 
+# initialization
 app = create_app(DevConfig)
 
+# Authentication Object
 auth = HTTPBasicAuth()
 
 
 @auth.verify_password
 def authenticate_token(token, password):
+    """Autheticate User with the provideded token."""
     if User.verify_token(token):
         return True
     return False
@@ -27,6 +31,8 @@ def authenticate_token(token, password):
 
 @auth.error_handler
 def unauthorize():
+    """Handles unauthorize access to the API."""
+
     return make_response(jsonify({'Error': 'Invalid token Supplied or token '
                                   'has expired, Login again to get access'
                                   ' token'}), 401)
@@ -34,16 +40,24 @@ def unauthorize():
 
 class CreateUserAPI(Resource):
     """Register User to the app.
+       Create an instance of the User Model and save to the database
 
+       Inherits:
+           Resource
     """
 
     def __init__(self):
+        """Initialize the API call and specified the required parameter.
+
+        Makes call Resource constructor
+        """
         self.parser = reqparse.RequestParser()
         self.parser.add_argument('username', type=str, required=True)
         self.parser.add_argument('password', type=str, required=True)
         super(CreateUserAPI, self).__init__()
 
     def post(self):
+        """Handles the POST call to the CreateUserAPI."""
         data = self.parser.parse_args()
         username = data.get('username')
         password = data.get('password')
@@ -60,7 +74,16 @@ class CreateUserAPI(Resource):
 
 
 class LoginUserAPI(Resource):
+    """Login a user, provides an Authentication token.
+
+    Inherits:
+        Resource
+    """
     def __init__(self):
+        """Initialize the API call and specified the required parameter.
+
+        Makes call Resource constructor
+        """
         self.parser = reqparse.RequestParser()
         self.parser.add_argument('username', type=str, required=True,
                                  location='json')
@@ -69,6 +92,12 @@ class LoginUserAPI(Resource):
         super(LoginUserAPI, self).__init__()
 
     def post(self):
+        """Handles the post call to the LoginUserAPI.
+
+        Return:
+            [Response] containing the token if login is successful
+
+        """
         data = self.parser.parse_args()
         user = User.get_user(data['username'], data['password'])
         if not user:
@@ -78,8 +107,10 @@ class LoginUserAPI(Resource):
 
 
 class HelpAPI(Resource):
+    """Provides a help platform for the user. """
 
     def get(self):
+        """Handles the get call to the HelpAPI."""
         help_message = {
             "message": "Access the app with url provided",
             "register": {
@@ -108,13 +139,24 @@ class HelpAPI(Resource):
 
 
 class BucketListAPI(Resource):
+    """The API for all bucketlist request.
+       requires authentication for access
+
+       Inherits:
+           Resource
+    """
     decorators = [auth.login_required]
 
     def __init__(self):
+        """Initialize the API call and specified the required parameter.
+
+        Makes call Resource constructor
+        """
         self.parser = self.parser = reqparse.RequestParser()
         self.parser.add_argument('name', type=str, location='json')
         self.parser.add_argument('is_public', type=bool, location='json')
         self.parser.add_argument('Authorization', location='headers')
+        super(BucketListAPI, self).__init__()
 
     def post(self):
         data = self.parser.parse_args()
@@ -187,12 +229,23 @@ class BucketListAPI(Resource):
 
 
 class ItemListAPI(Resource):
+    """The API for all Item request.
+       requires authentication for access
+
+       Inherits:
+           Resource
+    """
     decorators = [auth.login_required]
 
     def __init__(self):
+        """Initialize the API call and specified the required parameter.
+
+        Makes call Resource constructor
+        """
         self.parser = self.parser = reqparse.RequestParser()
         self.parser.add_argument('name', type=str, location='json')
         self.parser.add_argument('done', type=int, location='json')
+        super(ItemListAPI, self).__init__()
 
     def post(self, id):
         data = self.parser.parse_args()
@@ -246,7 +299,6 @@ class ItemListAPI(Resource):
         return response
 
 
-# Todo
 api.add_resource(HelpAPI, '/help', endpoint='help')
 api.add_resource(CreateUserAPI, '/auth/register', endpoint='register')
 api.add_resource(LoginUserAPI, '/auth/login', endpoint='login')
