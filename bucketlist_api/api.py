@@ -291,7 +291,7 @@ class ItemListAPI(Resource):
             abort(401, "NotPermitted: You can't access bucketlist belonging to"
                        " other users")
         item = BucketListItem.query.filter_by(id=item_id,
-                                              bucketlist_id=item_id).delete()
+                                              bucketlist_id=id).delete()
         if not item:
             abort(404, "DeleteFailed: Item with the specified id not found")
         BucketList.update_bucketlist(id)
