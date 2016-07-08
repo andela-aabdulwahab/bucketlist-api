@@ -1,5 +1,6 @@
 import os
 from flask import Flask, request, jsonify, g, url_for
+from sqlalchemy import desc
 from datetime import datetime
 from passlib.apps import custom_app_context as pwd_context
 from bucketlist_api import create_app, db
@@ -283,7 +284,7 @@ class BucketList(db.Model):
         query = cls.query.filter_by(user_id=user_id)
         if id:
             return cls.id_bucketlist(id, query)
-        query = query.order_by(cls.date_modified.desc())
+        query = query.order_by(desc(cls.date_modified))
         q = kwargs.get('q')
         if q:
             query = query.filter(cls.name.contains(q))
