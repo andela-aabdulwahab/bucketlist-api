@@ -175,8 +175,8 @@ class BucketList(db.Model):
     __tablename__ = 'bucketlist'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    date_created = db.Column(db.DateTime, default=datetime.now())
-    date_modified = db.Column(db.DateTime, default=datetime.now())
+    date_created = db.Column(db.DateTime, default=db.func.now())
+    date_modified = db.Column(db.DateTime, default=db.func.now())
     is_public = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     items = db.relationship('BucketListItem', backref=db.backref('bucketlist',
@@ -284,7 +284,7 @@ class BucketList(db.Model):
         query = cls.query.filter_by(user_id=user_id)
         if id:
             return cls.id_bucketlist(id, query)
-        query = query.order_by(desc(cls.date_modified))
+        query = query.order_by(desc(BucketList.date_modified))
         q = kwargs.get('q')
         if q:
             query = query.filter(cls.name.contains(q))
@@ -301,7 +301,7 @@ class BucketList(db.Model):
     @classmethod
     def update_bucketlist(cls, bucketlist_id):
         bucketlist = cls.query.filter_by(id=bucketlist_id).first()
-        cls.date_modified = datetime.now()
+        cls.date_modified = db.func.now()
         save(bucketlist)
 
 
