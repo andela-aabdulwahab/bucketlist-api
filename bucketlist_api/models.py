@@ -192,7 +192,6 @@ class BucketList(BucketListModel):
     """Provides the database Model for the BucketList.
 
     Attributes:
-        date_created: [datetime] The date bucketlist was created
         is_public: [Boolean] Is availability to the user
         user_id: [int] the foreign key user id
         item: [Model Fk] The bucketlist-item relationship
@@ -333,7 +332,6 @@ class BucketListItem(BucketListModel):
     Attributes:
         bucketlist_id: [int] it of the bucketlist it belongs to
         done: [Boolean]
-        date_created: [datetime] The date item was created
 
     """
     __tablename__ = 'items'
