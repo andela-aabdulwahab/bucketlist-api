@@ -144,8 +144,8 @@ class User(BaseModel):
             return None
         return user
 
-    @classmethod
-    def get_user_with_token(cls, token):
+    @staticmethod
+    def get_user_with_token(token):
         """Get a user with the token provided.
 
         Arguments:
@@ -154,10 +154,10 @@ class User(BaseModel):
         Return:
             user [Model] User Model containing the user information
         """
-        return cls.verify_token(token)
+        return User.verify_token(token)
 
-    @classmethod
-    def user_exist(cls, username):
+    @staticmethod
+    def user_exist(username):
         """Verify if a user already exist in the Database.
 
         Arguments:
@@ -166,7 +166,7 @@ class User(BaseModel):
         Return:
             [Boolean] Representing the status of the user existence
         """
-        if cls.query.filter_by(username=username).first():
+        if User.query.filter_by(username=username).first():
             return True
         return False
 
@@ -206,8 +206,8 @@ class BucketList(BucketListModel):
     items = db.relationship('BucketListItem', backref=db.backref('bucketlist',
                             lazy='joined'), lazy='dynamic')
 
-    @classmethod
-    def build_bucketlist(cls, list_bucketlist):
+    @staticmethod
+    def build_bucketlist(list_bucketlist):
         """Covert a list of BucketList model object into python Dictionary
         Object.
 
@@ -221,7 +221,7 @@ class BucketList(BucketListModel):
         for bucketlist in list_bucketlist:
             bucketlist_dict[bucketlist.id] = {
                 'id': bucketlist.id,
-                'items': cls.get_bucketlist_items(bucketlist.id),
+                'items': BucketList.get_bucketlist_items(bucketlist.id),
                 'name': bucketlist.name,
                 'date_created': bucketlist.date_created,
                 'date_modified': bucketlist.date_modified,
@@ -246,8 +246,8 @@ class BucketList(BucketListModel):
             return []
         return BucketListItem.build_item_list(items)
 
-    @classmethod
-    def id_bucketlist(cls, id, query):
+    @staticmethod
+    def id_bucketlist(id, query):
         """Get bucketlist with a specified id.
         Arguments:
             id: [int] id of the bucketlist to Get
@@ -263,10 +263,10 @@ class BucketList(BucketListModel):
             bucketlist = []
         else:
             bucketlist = [bucketlist]
-        return [cls.build_bucketlist(bucketlist), None]
+        return [BucketList.build_bucketlist(bucketlist), None]
 
-    @classmethod
-    def paginate_bucketlist(cls, query, page, limit, q):
+    @staticmethod
+    def paginate_bucketlist(query, page, limit, q):
         """paginate the bucketlist return from a query.
 
         Arguments:
@@ -292,10 +292,10 @@ class BucketList(BucketListModel):
                                              limit=limit, page=page_bucketlist
                                              .prev_num, q=q, _method='GET',
                                              _external=True)
-        return [cls.build_bucketlist(bucketlist), pagination]
+        return [BucketList.build_bucketlist(bucketlist), pagination]
 
-    @classmethod
-    def get_bucketlist(cls, id=None, user_id=None, **kwargs):
+    @staticmethod
+    def get_bucketlist(id=None, user_id=None, **kwargs):
         """Get a bucketlist from the database.
 
         Arguments:
@@ -305,13 +305,13 @@ class BucketList(BucketListModel):
         Return:
             [list] containing the bucketlist dictionary and pagination ppt
         """
-        query = cls.query.filter_by(user_id=user_id)
+        query = BucketList.query.filter_by(user_id=user_id)
         if id:
-            return cls.id_bucketlist(id, query)
+            return BucketList.id_bucketlist(id, query)
         query = query.order_by(desc(BucketList.date_modified))
         q = kwargs.get('q')
         if q:
-            query = query.filter(cls.name.contains(q))
+            query = query.filter(BucketList.name.contains(q))
         page = kwargs.get('page')
         limit = kwargs.get('limit')
         if page and page.isdigit():
@@ -320,7 +320,7 @@ class BucketList(BucketListModel):
             limit = int(limit)
         if limit > 100:
             limit = 100
-        return cls.paginate_bucketlist(query, page, limit, q)
+        return BucketList.paginate_bucketlist(query, page, limit, q)
 
 
 class BucketListItem(BucketListModel):
@@ -360,8 +360,3 @@ class BucketListItem(BucketListModel):
             }
             item_list.append(item_dict)
         return item_list
-
-    def update(self):
-        bucketlist = BucketList.query.filter_by(id=self.bucketlist_id)
-        bucketlist.update()
-        super(BucketListItem, self).update()
