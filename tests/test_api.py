@@ -13,8 +13,11 @@ from bucketlist_api.models import User, BucketList, BucketListItem
 import unittest
 from bucketlist_api import create_app, db, api
 from bucketlist_api.config import TestConfig
-from bucketlist_api.api import (CreateUserAPI, LoginUserAPI, BucketListAPI,
-                                ItemListAPI, HelpAPI)
+from bucketlist_api.resources.bucketlistapi import BucketListAPI
+from bucketlist_api.resources.itemlistapi import ItemListAPI
+from bucketlist_api.resources.createuserapi import CreateUserAPI
+from bucketlist_api.resources.loginuserapi import LoginUserAPI
+from bucketlist_api.resources.helpapi import HelpAPI
 
 
 class TestAuthentication(unittest.TestCase):
