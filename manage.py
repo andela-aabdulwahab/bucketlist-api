@@ -1,10 +1,8 @@
 from flask_script import Manager, Server
 from flask_migrate import Migrate, MigrateCommand
 from bucketlist_api import models, create_app, db
-from bucketlist_api.config import DevConfig
+from bucketlist_api.api import app
 import nose
-
-app = create_app(DevConfig)
 
 manager = Manager(app)
 migrate = Migrate(app, db)

@@ -306,6 +306,3 @@ api.add_resource(BucketListAPI, '/bucketlists', '/bucketlists/<int:id>',
                  endpoint='bucketlists')
 api.add_resource(ItemListAPI, '/bucketlists/<int:id>/items',
                  '/bucketlists/<int:id>/items/<int:item_id>', endpoint='items')
-
-if __name__ == '__main__':
-    app.run(debug=True)
