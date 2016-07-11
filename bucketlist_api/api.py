@@ -9,7 +9,7 @@ sys.path.insert(0, parentdir)
 from flask import jsonify, request, abort, make_response, url_for
 from flask_restful import Api, Resource, reqparse, fields
 from flask_httpauth import HTTPBasicAuth
-from bucketlist_api.models import User, BucketList, BucketListItem, save
+from bucketlist_api.models import User, BucketList, BucketListItem
 from bucketlist_api import create_app, api
 from bucketlist_api.config import DevConfig
 from datetime import datetime
@@ -66,7 +66,7 @@ class CreateUserAPI(Resource):
                        'already exist')
         new_user = User(username=username)
         new_user.hash_password(password)
-        save(new_user)
+        new_user.save()
         token = new_user.generate_auth_token()
         response = jsonify({'token': token.decode('ascii')})
         response.status_code = 201
@@ -171,7 +171,7 @@ class BucketListAPI(Resource):
         auth_data = request.authorization
         user = User.get_user_with_token(auth_data.get('username'))
         bucketlist.user_id = user.id
-        save(bucketlist)
+        bucketlist.save()
         response = jsonify({'bucketlist': url_for('api.bucketlists',
                                                   id=bucketlist.id,
                                                   _external=True)})
@@ -206,8 +206,7 @@ class BucketListAPI(Resource):
             bucketlist.name = data['name']
         if data.get('is_public'):
             bucketlist.is_public = data['is_public']
-        bucketlist.date_modified = datetime.now()
-        save(bucketlist)
+        bucketlist.save()
         response = jsonify({'bucketlist': url_for('api.bucketlists',
                                                   id=bucketlist.id,
                                                   _external=True)})
@@ -222,7 +221,7 @@ class BucketListAPI(Resource):
         if not bucketlist:
             abort(404, "DeleteFailed: No bucketlist with the specified id")
         items = (BucketListItem.query.filter_by(bucketlist_id=id).delete())
-        save()
+        BucketList.commit()
         response = jsonify({'message': 'bucketlist deleted'})
         response.status_code = 204
         return response
@@ -258,7 +257,7 @@ class ItemListAPI(Resource):
         item = BucketListItem(name=data['name'], bucketlist_id=id)
         item.date_created = datetime.now()
         item.date_modified = datetime.now()
-        save(item)
+        item.save()
         response = jsonify({'bucketlist': url_for('api.bucketlists', id=id,
                             _external=True)})
         response.status_code = 201
@@ -278,9 +277,7 @@ class ItemListAPI(Resource):
             item.name = data['name']
         if data.get('done'):
             item.done = data['done']
-        item.date_modified = datetime.now()
-        save(item)
-        BucketList.update_bucketlist(id)
+        item.save()
         response = jsonify({'bucketlist': url_for('api.bucketlists', id=id,
                             _external=True)})
         return response
@@ -294,8 +291,8 @@ class ItemListAPI(Resource):
                                               bucketlist_id=id).delete()
         if not item:
             abort(404, "DeleteFailed: Item with the specified id not found")
-        BucketList.update_bucketlist(id)
-        save()
+        bucketlist = BucketList.query.filter_by(id=id).first()
+        bucketlist.save()
         response = jsonify({'bucketlist': url_for('api.bucketlists', id=id,
                             _external=True)})
         response.status_code = 204
