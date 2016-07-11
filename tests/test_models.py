@@ -83,11 +83,6 @@ class TestBucketListModels(unittest.TestCase):
         self.assertIsNone(bucketlists[1])
         self.assertTrue(type(bucketlists[0]) is dict)
 
-    def test_update_bucketlist(self):
-        prev_date_modified = self.bucketlist.date_modified
-        BucketList.update_bucketlist(self.bucketlist.id)
-        self.assertNotEqual(prev_date_modified, self.bucketlist.date_created)
-
 
 class TestBucketListItemModels(unittest.TestCase):
 
