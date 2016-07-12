@@ -11,7 +11,8 @@ import json
 from base64 import b64encode
 from bucketlist_api.models import User, BucketList, BucketListItem
 import unittest
-from bucketlist_api import create_app, db, api
+from bucketlist_api import create_app, db
+from bucketlist_api.api import api
 from bucketlist_api.config import TestConfig
 from bucketlist_api.resources.bucketlistapi import BucketListAPI
 from bucketlist_api.resources.itemlistapi import ItemListAPI
