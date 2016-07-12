@@ -1,11 +1,7 @@
-import os, sys, inspect
-
-# Append Curent path to the system path to allow model visibility
-currentdir = os.path.dirname(os.path.abspath(inspect.
-                             getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-
+"""Scripts bind API resources with the url to the API instance."""
+import os
+import sys
+import inspect
 from flask import jsonify, request, abort, make_response, url_for
 from flask_httpauth import HTTPBasicAuth
 from bucketlist_api import create_app, api

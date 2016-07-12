@@ -1,3 +1,5 @@
+"""Script manage migration and server running."""
+
 from flask_script import Manager, Server
 from flask_migrate import Migrate, MigrateCommand
 from bucketlist_api import models, create_app, db
@@ -30,6 +32,7 @@ def test():
 
 @manager.shell
 def make_shell_context():
+    """Create a Python Shell to test application."""
     return dict(app=app, db=db, models=models)
 
 manager.add_command('db', MigrateCommand)

@@ -1,3 +1,5 @@
+"""Script defined to handle bucketlist API Calls."""
+
 from flask_restful import Resource, reqparse
 from flask import jsonify, request, abort, url_for
 from bucketlist_api.models import User, BucketList, BucketListItem

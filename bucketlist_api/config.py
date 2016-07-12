@@ -1,3 +1,5 @@
+"""Script define the various app configuration."""
+
 import os
 
 

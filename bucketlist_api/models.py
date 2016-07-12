@@ -1,3 +1,5 @@
+"""Script defines models for the application.""""
+
 import os
 from flask import Flask, request, jsonify, g, url_for
 from sqlalchemy import desc

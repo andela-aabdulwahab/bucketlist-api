@@ -1,3 +1,5 @@
+"""Script defines custom error."""
+
 errors = {
     'UserAlreadyExistError': {
         'message': '',

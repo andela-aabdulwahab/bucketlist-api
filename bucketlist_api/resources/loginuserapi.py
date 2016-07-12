@@ -1,3 +1,5 @@
+"""Script handles Login API Calls."""
+
 from flask_restful import Resource, reqparse
 from flask import jsonify, request, abort, url_for
 from bucketlist_api.models import User

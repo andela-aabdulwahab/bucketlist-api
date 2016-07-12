@@ -1,3 +1,5 @@
+"""Script AUthenticate user."""
+
 from flask_httpauth import HTTPBasicAuth
 from bucketlist_api.models import User
 from flask import jsonify, make_response

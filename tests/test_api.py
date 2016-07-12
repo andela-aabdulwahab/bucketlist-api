@@ -1,12 +1,6 @@
 import os
 import sys
 import inspect
-
-currentdir = os.path.dirname(os.path.abspath(inspect.
-                             getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-
 import json
 from base64 import b64encode
 from bucketlist_api.models import User, BucketList, BucketListItem

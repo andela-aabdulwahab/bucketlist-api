@@ -1,17 +1,12 @@
 import os
 import sys
 import inspect
-
-currentdir = os.path.dirname(os.path.abspath(inspect.
-                             getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-
 from bucketlist_api.models import User, BucketList, BucketListItem
 import unittest
 from bucketlist_api import create_app, db
 from bucketlist_api.config import TestConfig
 import time
+
 
 class Testmodels(unittest.TestCase):
 
