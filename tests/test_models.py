@@ -15,8 +15,7 @@ class Testmodels(unittest.TestCase):
         self.app.app_context().push()
         db.create_all()
         self.user = User(username="tester", password="wahab")
-        db.session.add(self.user)
-        db.session.commit()
+        self.user.save()
         self.token = self.user.generate_auth_token()
 
     def test_user_model(self):
@@ -33,7 +32,7 @@ class Testmodels(unittest.TestCase):
         self.assertTrue(User.verify_token(self.token))
 
     def test_verify_invalid_token(self):
-        invalid_token = "this-is-no-way-a-token-nvnfovndsvnsdjn"
+        invalid_token = "this-is-no-way-a-token"
         self.assertFalse(User.verify_token(invalid_token))
 
     def test_expired_token(self):
@@ -53,11 +52,14 @@ class TestBucketListModels(unittest.TestCase):
         db.create_all()
         self.bucketlist = BucketList(name="Travel the World")
         self.bucketlist.user_id = 10
-        db.session.add(self.bucketlist)
-        db.session.commit()
+        self.bucketlist.save()
 
     def test_bucketlist_init(self):
         self.assertGreater(self.bucketlist.id, 0)
+
+    def test_bucketlist_update(self):
+        self.bucketlist.update(is_public=True)
+        self.assertTrue(self.bucketlist.is_public)
 
 
 class TestBucketListItemModels(unittest.TestCase):
@@ -69,14 +71,12 @@ class TestBucketListItemModels(unittest.TestCase):
         self.bucketlist = BucketList(name="Travel the world")
         db.session.add(self.bucketlist)
         self.bucketlist_item = BucketListItem(name="See the great wall")
-        self.bucketlist_item.bucketlist_id = self.bucketlist.id
-        db.session.add(self.bucketlist_item)
-        db.session.commit()
+        self.bucketlist.items.append(self.bucketlist_item)
+        self.bucketlist_item.save()
 
     def tearDown(self):
-        BucketList.query.filter_by(id=self.bucketlist.id).delete()
-        BucketListItem.query.filter_by(id=self.bucketlist_item.id)
-        db.session.commit()
+        self.bucketlist.delete()
+        self.bucketlist_item.delete()
 
     def test_bucketlist_item_init(self):
         self.assertGreater(self.bucketlist_item.id, 0)

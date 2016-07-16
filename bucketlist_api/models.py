@@ -32,7 +32,7 @@ class BaseModel(db.Model):
         """Update specific fields of a record."""
         # Prevent changing ID of object
         kwargs.pop('id', None)
-        for attr, value in kwargs.iteritems():
+        for attr, value in kwargs.items():
             if value is not None:
                 setattr(self, attr, value)
         return commit and self.save() or self
