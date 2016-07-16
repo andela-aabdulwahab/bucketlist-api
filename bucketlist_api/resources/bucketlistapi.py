@@ -31,9 +31,8 @@ class BucketListAPI(Resource):
         if not data.get('name'):
             abort(400, 'BucketListNotCreated: Name not specified'
                        'for bucketlist')
-        bucketlist = BucketList(name=data['name'], is_public=False)
-        if data.get('is_public'):
-            bucketlist.is_public = data['is_public']
+        is_public = data.get('is_public', False)
+        bucketlist = BucketList(name=data['name'], is_public=is_public)
         auth_data = request.authorization
         user = User.get_user_with_token(auth_data.get('username'))
         bucketlist.user_id = user.id

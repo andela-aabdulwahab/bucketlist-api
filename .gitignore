@@ -10,20 +10,10 @@ bucketlist.sqlite
 /bucketlist_api/bucktelist.sqlite
 
 #python cache
+*.pyc
 /__pycache__
-
-/bucketlist_api/__pycache__
-/bucketlist_api/api.pyc
-/bucketlist_api/config.pyc
-/bucketlist_api/custom_error.pyc
-/bucketlist_api/models.pyc
-/bucketlist_api/__init__.pyc
-/bucketlist_api/resources/__pycache__
-
 /tests/__pycache__
-/tests/test_api.pyc
 /tests/helpers.py
-/tests/test_models.pyc
 
 
 #cover

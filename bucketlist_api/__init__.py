@@ -3,6 +3,7 @@
 from flask import Flask, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
+from flask_api import FlaskAPI
 from bucketlist_api.custom_error import errors
 
 db = SQLAlchemy()
@@ -19,7 +20,7 @@ def create_app(ConfigObj):
     Return:
         Flask App instance
     """
-    app = Flask(__name__)
+    app = FlaskAPI(__name__)
     app.config.from_object(ConfigObj)
     db.init_app(app)
     app.register_blueprint(api_blueprint)
