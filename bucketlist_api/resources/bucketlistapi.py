@@ -1,9 +1,13 @@
 """Script defined to handle bucketlist API Calls."""
 
-from flask_restful import Resource, reqparse
-from flask import jsonify, request, abort, url_for
+from flask_restful import Resource, reqparse, marshal_with
+from flask import g, jsonify, request, abort, url_for
+from flask_api import status
 from bucketlist_api.models import User, BucketList, BucketListItem
 from bucketlist_api.authentication import auth
+from bucketlist_api.decorators import paginate
+from bucketlist_api.serializers import bucketlist_serializer, \
+                                       bucketlist_collection_serializer
 
 
 class BucketListAPI(Resource):
@@ -26,6 +30,7 @@ class BucketListAPI(Resource):
         self.parser.add_argument('Authorization', location='headers')
         super(BucketListAPI, self).__init__()
 
+    @marshal_with(bucketlist_serializer)
     def post(self):
         data = self.parser.parse_args()
         if not data.get('name'):
@@ -33,60 +38,30 @@ class BucketListAPI(Resource):
                        'for bucketlist')
         is_public = data.get('is_public', False)
         bucketlist = BucketList(name=data['name'], is_public=is_public)
-        auth_data = request.authorization
-        user = User.get_user_with_token(auth_data.get('username'))
-        bucketlist.user_id = user.id
+        g.user.bucketlists.append(bucketlist)
         bucketlist.save()
-        response = jsonify({'bucketlist': url_for('api.bucketlists',
-                                                  id=bucketlist.id,
-                                                  _external=True)})
-        response.status_code = 201
-        return response
+        return bucketlist, 201
 
+    @marshal_with(bucketlist_collection_serializer)
+    @paginate
     def get(self, id=None):
-        auth_data = request.authorization
-        limit = request.args.get('limit', '20')
-        page = request.args.get('page')
-        user = User.get_user_with_token(auth_data.get('username'))
-        q = request.args.get('q')
         if id:
-            bucketlist = BucketList.get_bucketlist(id=id, user_id=user.id)
-        else:
-            bucketlist = BucketList.get_bucketlist(user_id=user.id, q=q,
-                                                   limit=limit, page=page)
-        if len(bucketlist[0]) < 1:
-            abort(404, "NotFound: No bucketlist that satisfy the specified"
-                       " parameter found")
-        return jsonify({'bucketlists': bucketlist})
+            return g.user.bucketlists.filter_by(id=id)
+        q = request.args.get('q')
+        if q:
+            return g.user.bucketlists.filter(BucketList.name.contains(q))
+        return g.user.bucketlists
 
+    @marshal_with(bucketlist_serializer)
     def put(self, id):
-        auth_data = request.authorization
         data = self.parser.parse_args()
-        user = User.get_user_with_token(auth_data.get('username'))
-        bucketlist = (BucketList.query.filter_by(id=id, user_id=user.id)
-                                      .first())
-        if bucketlist is None:
-            abort(404, "UpdateFailed: No bucketlist with the specified id")
-        if data.get('name'):
-            bucketlist.name = data['name']
-        if data.get('is_public'):
-            bucketlist.is_public = data['is_public']
-        bucketlist.save()
-        response = jsonify({'bucketlist': url_for('api.bucketlists',
-                                                  id=bucketlist.id,
-                                                  _external=True)})
-        response.status_code = 201
-        return response
+        bucketlist = g.user.bucketlists.filter_by(id=id).first_or_404()
+        name = data.get('name', bucketlist.name)
+        is_public = data.get('is_public', bucketlist.is_public)
+        bucketlist.update(name=name, is_public=is_public)
+        return bucketlist
 
     def delete(self, id):
-        auth_data = request.authorization
-        user = User.get_user_with_token(auth_data.get('username'))
-        bucketlist = (BucketList.query.filter_by(id=id, user_id=user.id)
-                                      .delete())
-        if not bucketlist:
-            abort(404, "DeleteFailed: No bucketlist with the specified id")
-        items = (BucketListItem.query.filter_by(bucketlist_id=id).delete())
-        BucketList.commit()
-        response = jsonify({'message': 'bucketlist deleted'})
-        response.status_code = 204
-        return response
+        bucketlist = g.user.bucketlists.filter_by(id=id).first_or_404()
+        bucketlist.delete()
+        return '', status.HTTP_204_NO_CONTENT

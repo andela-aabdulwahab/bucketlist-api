@@ -1,8 +1,9 @@
 """Script handles Login API Calls."""
 
-from flask_restful import Resource, reqparse
-from flask import jsonify, request, abort, url_for
+from flask_restful import Resource, reqparse, marshal_with
+from flask import abort, url_for
 from bucketlist_api.models import User
+from bucketlist_api.serializers import user_serializer
 
 
 class LoginUserAPI(Resource):
@@ -23,6 +24,7 @@ class LoginUserAPI(Resource):
                                  location='json')
         super(LoginUserAPI, self).__init__()
 
+    @marshal_with(user_serializer)
     def post(self):
         """Handles the post call to the LoginUserAPI.
 
@@ -33,6 +35,6 @@ class LoginUserAPI(Resource):
         data = self.parser.parse_args()
         user = User.get_user(data['username'], data['password'])
         if not user:
-            abort(401, "Username or password not correct")
+            abort(400, "Username or password not correct")
         token = user.generate_auth_token()
-        return jsonify({'token': token.decode('ascii')})
+        return {'token': token.decode('utf-8')}

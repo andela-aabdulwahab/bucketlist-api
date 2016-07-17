@@ -1,8 +1,9 @@
 """Script defined to handle Register API Call."""
 
-from flask_restful import Resource, reqparse
-from flask import jsonify, request, abort, url_for
+from flask_restful import Resource, reqparse, marshal_with
+from flask import abort
 from bucketlist_api.models import User
+from bucketlist_api.serializers import user_serializer
 
 class CreateUserAPI(Resource):
     """Register User to the app.
@@ -18,22 +19,22 @@ class CreateUserAPI(Resource):
         Makes call Resource constructor
         """
         self.parser = reqparse.RequestParser()
-        self.parser.add_argument('username', type=str, required=True)
-        self.parser.add_argument('password', type=str, required=True)
+        self.parser.add_argument('username', type=str, required=True,
+                                 location='json')
+        self.parser.add_argument('password', type=str, required=True,
+                                 location='json')
         super(CreateUserAPI, self).__init__()
 
+    @marshal_with(user_serializer)
     def post(self):
         """Handles the POST call to the CreateUserAPI."""
         data = self.parser.parse_args()
         username = data.get('username')
         password = data.get('password')
         if User.user_exist(username):
-            abort(409, 'SignUpFailed: A User with the specified username '
+            abort(400, 'SignUpFailed: A User with the specified username '
                        'already exist')
-        new_user = User(username=username)
-        new_user.hash_password(password)
+        new_user = User(username=username, password=password)
         new_user.save()
         token = new_user.generate_auth_token()
-        response = jsonify({'token': token.decode('ascii')})
-        response.status_code = 201
-        return response
+        return {'token': token.decode('utf-8')}, 201
