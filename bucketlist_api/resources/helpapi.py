@@ -1,12 +1,13 @@
 """Script defined to handle Help API calls."""
 
-from flask_restful import Resource
-from flask import jsonify
+from flask_restful import Resource, marshal_with
+from bucketlist_api.serializers import help_message_serializer
 
 
 class HelpAPI(Resource):
     """Provides a help platform for the user. """
 
+    @marshal_with(help_message_serializer)
     def get(self):
         """Handles the get call to the HelpAPI."""
         help_message = {
@@ -24,7 +25,7 @@ class HelpAPI(Resource):
             "bucketlists": {
                 "methods": "GET, POST, PUT, DELETE",
                 "url": ["/bucketlists", "/bucketlists/<int:id>"],
-                "Public Access": False,
+                "PublicAccess": False,
              },
             "items": {
                 "methods": "POST, PUT, DELETE",
@@ -33,4 +34,4 @@ class HelpAPI(Resource):
                 "PublicAccess": False,
              },
         }
-        return jsonify(help_message)
+        return help_message

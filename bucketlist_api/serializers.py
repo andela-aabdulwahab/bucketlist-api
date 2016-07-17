@@ -34,3 +34,17 @@ bucketlist_collection_serializer = {
     'pagination': fields.Nested(pagination_fields),
     'bucketlists': fields.List(fields.Nested(bucketlist_serializer)),
 }
+
+help_fields = {
+    "methods": fields.String,
+    "url": fields.String,
+    "PublicAccess": fields.Boolean
+}
+
+help_message_serializer = {
+    "message": fields.String,
+    "register": fields.Nested(help_fields),
+    "login": fields.Nested(help_fields),
+    "bucketlists": fields.Nested(help_fields),
+    "items": fields.Nested(help_fields),
+}

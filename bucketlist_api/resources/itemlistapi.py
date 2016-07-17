@@ -36,7 +36,7 @@ class ItemListAPI(Resource):
         item = BucketListItem(name=data['name'], done=done)
         g.bucketlist.items.append(item)
         item.save()
-        return g.bucketlist
+        return g.bucketlist, 201
 
     @marshal_with(bucketlist_serializer)
     def put(self, bucketlist_id, item_id):
