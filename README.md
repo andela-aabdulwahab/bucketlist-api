@@ -90,27 +90,27 @@ On success a status code 200 is returned. The body of the response contains a JS
 On failure status code 404 (Not found) is returned.<br>
 
  ```sh
- $ GET /v1/bucketlists/&lt;id&gt;
+ $ GET /v1/bucketlists/<id>
  ```
 Get a specific bucketlist.<br>
 On success a status code 200 is returned. The body of the response contains a JSON object containing the bucket list
 On failure status code 404 (Not found) is returned.<br>
 
  ```sh
- $ PUT /v1/bucketlists/&lt;id&gt;
+ $ PUT /v1/bucketlists/<id>
  ```
 Update the bucket list specified.<br>
 The body must contain  a JSON object that defines the field(s) to be modified.
 On success a status code 201 is returned. On failure status code 404 (Not found) is returned.<br>
 
  ```sh
- $ DELETE /bucketlists/&lt;id&gt;
+ $ DELETE /bucketlists/<id>
  ```
 Delete the specified bucket list.<br>
 On success a status code 201 is returned. On failure status code 404 (Not found) is returned.<br>
 
  ```sh
- $ POST /bucketlists/&lt;id&gt;/items/
+ $ POST /bucketlists/<id>/items/
  ```
 Create an item in a Bucket list.<br>
 The body must contain  a JSON object that defines `name` field and an optional `done` field.
@@ -118,14 +118,14 @@ On success a status code 200 is returned. The body of the response contains a JS
 On failure status code 400 (bad request) is returned.<br>
 
  ```sh
- - PUT /bucketlists/&lt;id&gt;/items/&lt;item_id&gt;
+ - PUT /bucketlists/<id>/items/<item_id>
  ```
 Update the specified item in the bucketlist<br>
 The body must contain  a JSON object that defines the field(s) to be modified.
 On success a status code 201 is returned. On failure status code 404 (Not found) is returned or 401(unauthorize) if bucketlist doesn't belong to the user.<br>
 
  ```sh
- - DELETE /bucketlists/&lt;id&gt;/items/&lt;item_id&gt;
+ - DELETE /bucketlists/<id>/items/<item_id>
  ```
 Delete the specified item in the bucket list.<br>
 On success a status code 201 is returned. On failure status code 404 (Not found) is returned or 401(unauthorize) if bucketlist doesn't belong to the user.<br>
