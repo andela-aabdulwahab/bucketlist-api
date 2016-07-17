@@ -20,5 +20,6 @@ api.add_resource(CreateUserAPI, '/auth/register', endpoint='register')
 api.add_resource(LoginUserAPI, '/auth/login', endpoint='login')
 api.add_resource(BucketListAPI, '/bucketlists', '/bucketlists/<int:id>',
                  endpoint='bucketlists')
-api.add_resource(ItemListAPI, '/bucketlists/<int:id>/items',
-                 '/bucketlists/<int:id>/items/<int:item_id>', endpoint='items')
+api.add_resource(ItemListAPI, '/bucketlists/<int:bucketlist_id>/items',
+                 '/bucketlists/<int:bucketlist_id>/items/<int:item_id>',
+                 endpoint='items')

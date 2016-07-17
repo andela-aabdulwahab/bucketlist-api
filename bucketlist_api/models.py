@@ -86,8 +86,8 @@ class User(BaseModel):
     __tablename__ = 'users'
     username = db.Column(db.String(50), nullable=False)
     password_hash = db.Column(db.String(70))
-    bucketlists = db.relationship('BucketList', backref=db.backref('users',
-                                  lazy='joined'), lazy='dynamic')
+    bucketlists = db.relationship('BucketList', backref='users',
+                                  cascade="all, delete", lazy='dynamic')
 
     def __init__(self, username, password, **kwargs):
         super(User, self).__init__(username=username, **kwargs)
@@ -191,8 +191,8 @@ class BucketList(BucketListModel):
     __tablename__ = 'bucketlist'
     is_public = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    items = db.relationship('BucketListItem', backref=db.backref('bucketlist',
-                            lazy='joined'), lazy='dynamic')
+    items = db.relationship('BucketListItem', backref='bucketlist',
+                            cascade="all, delete", lazy='dynamic')
 
 
 class BucketListItem(BucketListModel):

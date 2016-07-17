@@ -20,7 +20,7 @@ def create_app(ConfigObj):
     Return:
         Flask App instance
     """
-    app = FlaskAPI(__name__)
+    app = Flask(__name__)
     app.config.from_object(ConfigObj)
     db.init_app(app)
     app.register_blueprint(api_blueprint)
