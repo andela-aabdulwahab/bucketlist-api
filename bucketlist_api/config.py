@@ -9,6 +9,8 @@ class Config(object):
     ERROR_404_HELP = False
     SECRET_KEY = 'randomthoughscomingtomymind'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+    DEFAULT_PER_PAGE = 20
+    MAX_PER_PAGE = 100
 
 
 class ProdConfig(Config):

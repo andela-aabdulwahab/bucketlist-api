@@ -2,7 +2,7 @@
 
 from flask_httpauth import HTTPBasicAuth
 from bucketlist_api.models import User
-from flask import jsonify, make_response
+from flask import jsonify, make_response, g
 
 # Authentication Object
 auth = HTTPBasicAuth()
@@ -11,7 +11,9 @@ auth = HTTPBasicAuth()
 @auth.verify_password
 def authenticate_token(token, password):
     """Autheticate User with the provideded token."""
-    if User.verify_token(token):
+    user = User.verify_token(token)
+    if user:
+        g.user = user
         return True
     return False
 
@@ -22,4 +24,4 @@ def unauthorize():
 
     return make_response(jsonify({'Error': 'Invalid token Supplied or token '
                                   'has expired, Login again to get access'
-                                  ' token'}), 401)
+                                  ' token'}), 403)
