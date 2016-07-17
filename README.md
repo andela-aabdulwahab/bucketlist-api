@@ -49,66 +49,83 @@ Run ```python manage.py test``` to run test and check coverage
 
 ### API Documentation
 
- - POST /v1/auth/register
+ ```sh
+ $ POST /v1/auth/register
+ ```
+Register a new user.<br>
+The body must contain a JSON object that defines `username` and `password` fields.<br>
+On success a status code 201 is returned. The body of the response contains a JSON object with a valid token for the new user.<br>
+On failure status code 400 (bad request) is returned.<br>
 
-    Register a new user.<br>
-    The body must contain a JSON object that defines `username` and `password` fields.<br>
-    On success a status code 201 is returned. The body of the response contains a JSON object with a valid token for the new user.<br>
-    On failure status code 400 (bad request) is returned.<br>
+ ```sh
+ $ POST /v1/auth/login
+ ```
+Login an existing user.<br>
+The body must contain a JSON object that defines `username` and `password` fields.<br>
+On successful login a status code 201 is returned. The body of the response contains a JSON object with a valid token for the user.<br>
+On failure status code 401 (unauthorize) is returned.<br>
 
- - POST /v1/auth/login
+ ```sh
+ $ GET /help/
+ ```
+Get help on API usage<br>
+On success a status code 200 is returned. With the body of the response containing help message
 
-    Login an existing user.<br>
-    The body must contain a JSON object that defines `username` and `password` fields.<br>
-    On successful login a status code 201 is returned. The body of the response contains a JSON object with a valid token for the user.<br>
-    On failure status code 401 (unauthorize) is returned.<br>
 
-Basic Authentication required to access all API listed below. Or status code 401 (unauthorized) is returned.
+> Basic Authentication required to access all API listed below. Or status code 401 (unauthorized) is returned.
 
- - POST /v1/bucketlists/
+ ```sh
+ $ POST /v1/bucketlists/
+ ```
+Create a BucketList.<br>
+The body must contain  a JSON object that defines `name` field and an optional `is_public` field.
+On success a status code 200 is returned. The body of the response contains a JSON object with a link to the created bucket list endpoint
+On failure status code 400 (bad request) is returned.<br>
 
-    Create a BucketList.<br>
-    The body must contain  a JSON object that defines `name` field and an optional `is_public` field.
-    On success a status code 200 is returned. The body of the response contains a JSON object with a link to the created bucket list endpoint
-    On failure status code 400 (bad request) is returned.<br>
+ ```sh
+ $ GET /v1/bucketlists/
+ ```
+Get all bucketlist of the User.<br>
+On success a status code 200 is returned. The body of the response contains a JSON object containing the bucket lists
+On failure status code 404 (Not found) is returned.<br>
 
- - GET /v1/bucketlists/
+ ```sh
+ $ GET /v1/bucketlists/&lt;id&gt;
+ ```
+Get a specific bucketlist.<br>
+On success a status code 200 is returned. The body of the response contains a JSON object containing the bucket list
+On failure status code 404 (Not found) is returned.<br>
 
-    Get all bucketlist of the User.<br>
-    On success a status code 200 is returned. The body of the response contains a JSON object containing the bucket lists
-    On failure status code 404 (Not found) is returned.<br>
+ ```sh
+ $ PUT /v1/bucketlists/&lt;id&gt;
+ ```
+Update the bucket list specified.<br>
+The body must contain  a JSON object that defines the field(s) to be modified.
+On success a status code 201 is returned. On failure status code 404 (Not found) is returned.<br>
 
- - GET /v1/bucketlists/&lt;id&gt;
+ ```sh
+ $ DELETE /bucketlists/&lt;id&gt;
+ ```
+Delete the specified bucket list.<br>
+On success a status code 201 is returned. On failure status code 404 (Not found) is returned.<br>
 
-    Get a specific bucketlist.<br>
-    On success a status code 200 is returned. The body of the response contains a JSON object containing the bucket list
-    On failure status code 404 (Not found) is returned.<br>
+ ```sh
+ $ POST /bucketlists/&lt;id&gt;/items/
+ ```
+Create an item in a Bucket list.<br>
+The body must contain  a JSON object that defines `name` field and an optional `done` field.
+On success a status code 200 is returned. The body of the response contains a JSON object with a link to the created bucket list endpoint
+On failure status code 400 (bad request) is returned.<br>
 
- - PUT /v1/bucketlists/&lt;id&gt;
-
-    Update the bucket list specified.<br>
-    The body must contain  a JSON object that defines the field(s) to be modified.
-    On success a status code 201 is returned. On failure status code 404 (Not found) is returned.<br>
-
- - DELETE /bucketlists/&lt;id&gt;
-
-    Delete the specified bucket list.<br>
-    On success a status code 201 is returned. On failure status code 404 (Not found) is returned.<br>
-
- - POST /bucketlists/&lt;id&gt;/items/
-
-    Create an item in a Bucket list.<br>
-    The body must contain  a JSON object that defines `name` field and an optional `done` field.
-    On success a status code 200 is returned. The body of the response contains a JSON object with a link to the created bucket list endpoint
-    On failure status code 400 (bad request) is returned.<br>
-
+ ```sh
  - PUT /bucketlists/&lt;id&gt;/items/&lt;item_id&gt;
+ ```
+Update the specified item in the bucketlist<br>
+The body must contain  a JSON object that defines the field(s) to be modified.
+On success a status code 201 is returned. On failure status code 404 (Not found) is returned or 401(unauthorize) if bucketlist doesn't belong to the user.<br>
 
-    Update the specified item in the bucketlist<br>
-    The body must contain  a JSON object that defines the field(s) to be modified.
-    On success a status code 201 is returned. On failure status code 404 (Not found) is returned or 401(unauthorize) if bucketlist doesn't belong to the user.<br>
-
+ ```sh
  - DELETE /bucketlists/&lt;id&gt;/items/&lt;item_id&gt;
-
-    Delete the specified item in the bucket list.<br>
-    On success a status code 201 is returned. On failure status code 404 (Not found) is returned or 401(unauthorize) if bucketlist doesn't belong to the user.<br>
+ ```
+Delete the specified item in the bucket list.<br>
+On success a status code 201 is returned. On failure status code 404 (Not found) is returned or 401(unauthorize) if bucketlist doesn't belong to the user.<br>
