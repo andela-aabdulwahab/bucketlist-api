@@ -86,7 +86,7 @@ class User(BaseModel):
     __tablename__ = 'users'
     username = db.Column(db.String(50), nullable=False)
     password_hash = db.Column(db.String(70))
-    bucketlists = db.relationship('BucketList', backref='users',
+    bucketlists = db.relationship('BucketList', backref='user',
                                   cascade="all, delete", lazy='dynamic')
 
     def __init__(self, username, password, **kwargs):

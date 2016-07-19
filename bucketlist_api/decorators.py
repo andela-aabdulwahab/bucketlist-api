@@ -18,7 +18,7 @@ def get_bucketlist(f):
 def own_by_user(f):
     @wraps(f)
     def func_wrapper(*args, **kwargs):
-        if g.bucketlist.users.id != g.user.id:
+        if g.bucketlist.user.id != g.user.id:
             abort(403, "NotPermitted: You can't access bucketlist belonging to"
                   " other users")
         return f(*args, **kwargs)
