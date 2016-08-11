@@ -1,0 +1,21 @@
+# Migrations scripts
+/migrations
+
+# virtual Env
+/venv
+/p2venv
+
+# Database file
+bucketlist.sqlite
+/bucketlist_api/bucktelist.sqlite
+
+#python cache
+*.pyc
+/__pycache__
+/tests/__pycache__
+/tests/helpers.py
+
+
+#cover
+/cover
+.coverage
